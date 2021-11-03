@@ -2,6 +2,8 @@
 Raw video-swin-transformer please click [raw video-swin-transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)
 Environment installing please refers to it.
 
+pip install kornia==0.5.0
+
 ### dataset 
 LSP dataset  
 total 962 videos 
