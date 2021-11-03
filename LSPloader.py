@@ -30,7 +30,7 @@ class MyData(Dataset):
         # try:
         video_file_name = self.video_dir[inx]
         file_path = os.path.join(self.video_path, video_file_name)
-        print(video_file_name)
+        # print(video_file_name)
         video_rd = VideoRead(file_path, num_frames=self.num_frame)
         video_tensor = video_rd.crop_frame()
         video_frame_length = video_rd.frame_length
@@ -89,7 +89,7 @@ class VideoRead:
             for i in range(self.frame_length):
                 frame = frames[i]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
+                frame = cv2.resize(frame, (224,224))  # [64, 3, 224, 224]
                 # frame = transform(frame).unsqueeze(0)
                 frames_tensor.append(frame)
             for i in range(self.num_frames - self.frame_length):
@@ -138,24 +138,24 @@ def preprocess(length, crops, num_frames):
     return label
 
 
+# #
+# root_dir = r'D:\人体重复运动计数\LSPdataset'
+# train_video_dir = 'train'
+# train_label_dir = 'train.csv'
+# valid_video_dir = 'valid'
+# valid_label_dir = 'valid.csv'
+# train_dataset = MyData(root_dir, train_video_dir, train_label_dir, 32)
+# valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=32)
+# trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=4)
+# validloader = DataLoader(valid_dataset, batch_size=4, shuffle=True,num_workers=4)
 #
-root_dir = r'D:\人体重复运动计数\LSPdataset'
-train_video_dir = 'train'
-train_label_dir = 'train.csv'
-valid_video_dir = 'valid'
-valid_label_dir = 'valid.csv'
-train_dataset = MyData(root_dir, train_video_dir, train_label_dir, 32)
-valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=32)
-trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=4)
-validloader = DataLoader(valid_dataset, batch_size=4, shuffle=True,num_workers=4)
-
-print(len(trainloader))
-
-
-for batch_idx, batch_data in enumerate(trainloader):
-    # print(batch_data[0].shape)
-    # print(batch_data[1].shape)
-    print(batch_idx)
-    if not batch_data:
-        print('error')
-print('over')
+# print(len(trainloader))
+#
+#
+# for batch_idx, batch_data in enumerate(trainloader):
+#     # print(batch_data[0].shape)
+#     # print(batch_data[1].shape)
+#     print(batch_idx)
+#     if not batch_data:
+#         print('error')
+# print('over')
