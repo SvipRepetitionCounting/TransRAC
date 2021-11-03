@@ -36,13 +36,13 @@ class attention(nn.Module):
 
 class Similarity_matrix(nn.Module):
 
-    def __init__(self, num_heads=8, model_dim=512):
+    def __init__(self, num_heads=4, model_dim=512):
         super().__init__()
 
         # self.dim_per_head = model_dim // num_heads
         self.num_heads = num_heads
         self.model_dim = model_dim
-        self.input_size = 128
+        self.input_size = 512
         self.linear_q = nn.Linear(self.input_size, model_dim)
         self.linear_k = nn.Linear(self.input_size, model_dim)
         self.linear_v = nn.Linear(self.input_size, model_dim)
@@ -130,17 +130,34 @@ class Prediction(nn.Module):
 
 
 class TransferModel(nn.Module):
-    def __init__(self, config, checkpoint):
+    def __init__(self, config, checkpoint, num_frames):
         super(TransferModel, self).__init__()
+        self.num_frames = num_frames
         self.config = config
         self.checkpoint = checkpoint
         self.backbone = self.load_model()
+        self.conv3D = nn.Conv3d(in_channels=768,
+                                out_channels=512,
+                                kernel_size=3,
+                                padding=(3, 1, 1),
+                                dilation=(3, 1, 1))
+        self.bn1 = nn.BatchNorm3d(512)
+        self.SpatialPooling = nn.MaxPool3d(kernel_size=(1, 7, 7))
+
         self.sims = Similarity_matrix()
-        self.ln1 = nn.Linear(768 * 49, 128)
+        self.conv3x3 = nn.Conv2d(in_channels=4 * 1,  # num_head*scale_num TODO:scale_num
+                                 out_channels=32,
+                                 kernel_size=3,
+                                 padding=1)
+
+        self.bn2 = nn.BatchNorm2d(32)
+
         self.dropout1 = nn.Dropout(0.25)
-        self.ln2 = nn.Linear(8 * 1 * 32, 512)  # head* len(scale) * f
+        self.input_projection = nn.Linear(self.num_frames * 32, 512)  #
+        self.ln1 = nn.LayerNorm(512)
+
         self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1)
-        self.FC = Prediction(32 * 512, 1024, 256, 32)
+        self.FC = Prediction(self.num_frames * 512, 2048, 512, self.num_frames)
 
     def load_model(self):
         cfg = Config.fromfile(self.config)
@@ -152,41 +169,76 @@ class TransferModel(nn.Module):
 
     def forward(self, x):
         with autocast():
-            b, c, t, h, w = x.shape
+            batch_size, c, num_frames, h, w = x.shape
             scales = [1]
             multi_scales = []
             for scale in scales:
                 if scale != 1:
                     padding_size = scale // 2
-                    zero_padding = torch.zeros(b, c, padding_size, h, w)  # temporal zero padding
+                    zero_padding = torch.zeros(batch_size, c, padding_size, h, w)  # temporal zero padding
                     x = torch.cat((zero_padding, x, zero_padding), dim=2)
                     crops = [x[:, :, i:i + scale, :, :] for i in
-                             range(0, 32 - scale + padding_size * 2, max(scale // 2, 1))]
+                             range(0, self.num_frames - scale + padding_size * 2, max(scale // 2, 1))]
                 else:
-                    crops = [x[:, :, i:i + scale, :, :] for i in range(0, 32)]
-                # print('padding shape: ', x.shape)
+                    crops = [x[:, :, i:i+1, :, :] for i in range(0, self.num_frames)]
                 slice = []
                 for crop in crops:
-                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/2, height/32, width/32]  帧过vst
-                    crop = crop.transpose(1, 2)  # ->[B, scale/2, 768,size,size]
-                    crop = crop.flatten(start_dim=2)  # ->[B, scale/2, 768*7*7]
-                    crop = F.relu(self.ln1(crop))  # [B, scale/2,128]  降维 768->128
+                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+
                     slice.append(crop)
-                x_scale = torch.cat(slice, dim=1)
+                x_scale = torch.cat(slice, dim=2)  # ->[b,768,f,size,size]
+                x_scale = F.relu(self.bn1(self.conv3D(x_scale)))  # ->[b,512,f,7,7]
                 # print(x_scale.shape)
+                x_scale = self.SpatialPooling(x_scale)  # ->[b,512,f,1,1]
+                x_scale = x_scale.squeeze(3).squeeze(3)  # -> [b,512,f]
+                x_scale = x_scale.transpose(1, 2)  # -> [b,32,512]
+                x_scale = x_scale.reshape(batch_size, self.num_frames, -1)  # -> [b,f,512]
+
                 # -------- similarity matrix ---------
-                x_sims = self.sims(x_scale, x_scale, x_scale)  # -> [b,multi-head,F,F]
+                x_sims = F.relu(self.sims(x_scale, x_scale, x_scale))  # -> [b,4,f,f]
                 multi_scales.append(x_sims)
 
-            x = torch.cat(multi_scales, dim=1)
+            x = torch.cat(multi_scales, dim=1)  # [B,4*scale_num,f,f]
+            x_matrix = x
+            x = F.relu(self.bn2(self.conv3x3(x)))  # [b,32,f,f]
+            x = self.dropout1(x)
+
+            x = x.permute(0, 2, 3, 1)  # [b,f,f,32]
             # --------- transformer encoder ------
-            x = x.transpose(1, 2)  # -> [B,F,head* scale,F]
-            x = x.flatten(start_dim=2)  # ->[b,f,head*scale*f]
-            x = F.relu(self.ln2(x))  # ->[b,f, 512]
-            x=self.dropout1(x)
+            x = x.flatten(start_dim=2)  # ->[b,f,32*f]
+            x = F.relu(self.input_projection(x))  # ->[b,f, 512]
+            x = self.ln1(x)
+            print('projection ',x.shape)
+
+            x = x.transpose(0, 1)  # [f,b,512]
             x = self.transEncoder(x)  # ->[b,f, 512]
+            x = x.transpose(0, 1)
+            print('encoder ', x.shape)
             x = x.flatten(1)  # ->[b,f*512]
-            x = self.FC(x)  # ->[b,32]
+            x = self.FC(x)  # ->[b,f]
 
             return x
 
+
+# root_dir = r'D:\人体重复运动计数\LSPdataset'
+# train_video_dir = 'train'
+# train_label_dir = 'train.csv'
+# valid_video_dir = 'valid'
+# valid_label_dir = 'valid.csv'
+#
+# config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
+# checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
+#
+# dummy_x = torch.rand(2, 3, 8, 224, 224)
+# NUM_FRAME = 8
+# train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
+# my_model = TransferModel(config=config, checkpoint=checkpoint,num_frames=NUM_FRAME)
+# # trainloader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
+# # for input, target in trainloader:
+# #     print('input',input.shape)
+# #     out=my_model(input)
+# #     break
+# out=my_model(dummy_x)
+# print(out.shape)
+# count = torch.sum(out, dim=1).round()
+# print(count)
