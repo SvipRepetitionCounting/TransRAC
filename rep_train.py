@@ -13,7 +13,7 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from my_tools import plot_grad_flow
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
-device_ids = [3, 4, 5, 7]
+device_ids = [0, 2]
 device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() else "cpu")
 torch.manual_seed(1)
 
@@ -40,18 +40,10 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
 
     """
     currEpoch = 0
-    trainLosses = []
-    validLosses = []
-    trainOBO = []
-    validOBO = []
-    trainMAE = []
-    validMAE = []
-
     trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
     validloader = DataLoader(valid_set, batch_size=batch_size, shuffle=True, num_workers=4)
     model = MMDataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
-
     lr_list = []
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 30], gamma=0.8)  # three step decay
 
@@ -80,11 +72,16 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
     lossSL1 = nn.SmoothL1Loss()
 
     for epoch in tqdm(range(currEpoch, n_epochs + currEpoch)):
+        trainLosses = []
+        validLosses = []
+        trainOBO = []
+        validOBO = []
+        trainMAE = []
+        validMAE = []
+
         if train:
             pbar = tqdm(trainloader, total=len(trainloader))
             batch_idx = 0
-            mean_loss = 0
-            mae = 0
             for input, target in pbar:
                 with autocast():
                     model.train()
@@ -99,38 +96,39 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     predict_density = output
                     loss1 = lossMSE(predict_density, density)
                     loss2 = lossSL1(predict_count, count)
-                    loss3 = torch.sum(torch.div(torch.abs(torch.sub(predict_count, count)), count + 1e-1))  # mae
+                    loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
+                            predict_count.flatten().shape[0]  # mae
                     loss = 5 * loss1 + loss2 + loss3  # 1029: 5*l1+l2 + l3
 
-                    gaps = torch.abs(torch.sub(predict_count, count)).reshape(-1).cpu().detach().numpy().reshape(
+                    gaps = torch.abs(torch.sub((predict_count>0), count)).reshape(-1).cpu().detach().numpy().reshape(
                         -1).tolist()
                     for item in gaps:
                         if item <= 1:
                             acc += 1
                     OBO = acc / predict_count.flatten().shape[0]
                     trainOBO.append(OBO)
-
-                    mae += loss3.item()
-                    trainMAE.append(loss3.item())
+                    MAE = loss3.item()
+                    trainMAE.append(MAE)
 
                     batch_loss = loss.item()
-                    mean_loss += batch_loss
+
                     trainLosses.append(batch_loss)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
-                                      'loss_train': mean_loss / batch_idx,
-                                      'Train MAE': mae / batch_idx,
+                                      'loss_train': batch_loss,
+                                      'Train MAE': MAE,
                                       'Train OBO ': OBO,
                                       'learning rate': optimizer.state_dict()['param_groups'][0]['lr']})
+
                     if batch_idx % 10 == 0:
                         writer.add_scalars('train/loss',
-                                           {"mean_loss": np.mean(trainLosses)},
+                                           {"loss": np.mean(trainLosses)},
+                                           epoch * len(trainloader) + batch_idx)
+                        writer.add_scalars('train/MAE',
+                                           {"MAE": np.mean(trainMAE)},
                                            epoch * len(trainloader) + batch_idx)
                         writer.add_scalars('train/OBO',
                                            {"OBO": np.mean(trainOBO)},
-                                           epoch * len(trainloader) + batch_idx)
-                        writer.add_scalars('train/MAE',
-                                           {"MAE": np.mean(trainMAE[-batch_idx + 1:])},
                                            epoch * len(trainloader) + batch_idx)
 
                 scaler.scale(loss).backward()
@@ -141,13 +139,11 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
         if valid:
             with torch.no_grad():
                 batch_idx = 0
-                mean_loss = 0
-                mae = 0
                 pbar = tqdm(validloader, total=len(validloader))
                 for input, target in pbar:
                     model.eval()
                     torch.cuda.empty_cache()
-                    acc = 0.0
+                    acc = 0
                     input = input.to(device)
                     density = target.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
@@ -158,7 +154,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
 
                     loss1 = lossMSE(predict_density, density)
                     loss2 = lossSL1(predict_count, count)
-                    loss3 = torch.sum(torch.div(torch.abs(torch.sub(predict_count, count)), count + 1e-1))  # mae
+                    loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
+                            predict_count.flatten().shape[0]  # mae
                     loss = 5 * loss1 + loss2 + loss3
 
                     # loss = loss1
@@ -168,25 +165,24 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                             acc += 1
                     OBO = acc / predict_count.flatten().shape[0]
                     validOBO.append(OBO)
-
-                    mae += loss3.item()
-                    validMAE.append(loss3.item())
-
+                    MAE = loss3.item()
+                    validMAE.append(MAE)
                     batch_loss = loss.item()
-                    mean_loss += batch_loss
                     validLosses.append(batch_loss)
+
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
-                                      'loss_valid': (mean_loss / batch_idx),
-                                      'Valid MAE': mae / batch_idx,
+                                      'loss_valid': batch_loss,
+                                      'Valid MAE': MAE,
                                       'Valid OBO ': OBO})
 
-                    writer.add_scalars('valid/MAE', {"MAE": np.mean(validMAE[-batch_idx + 1:])},
-                                       epoch * len(validloader) + batch_idx)
-                    writer.add_scalars('valid/loss', {"mean_loss": np.mean(validLosses)},
+                    writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
                                        epoch * len(validloader) + batch_idx)
                     writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
                                        epoch * len(validloader) + batch_idx)
+                    writer.add_scalars('valid/MAE',
+                                       {"MAE": np.mean(validMAE)},
+                                       epoch * len(trainloader) + batch_idx)
 
         scheduler.step()
         lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
@@ -200,17 +196,15 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                 'valLosses': validLosses
             }
             torch.save(checkpoint,
-                       'checkpoint/' + ckpt_name + '/' + ckpt_name + '_' + str(epoch) + '.pt')
+                       'checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
 
         writer.add_scalars('learning rate',
                            {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']},
                            epoch)
 
-    return trainLosses, validLosses
 
-
-# root_dir = r'/p300/data/LSPdataset'
-root_dir = r'D:\人体重复运动计数\LSPdataset'
+root_dir = r'/p300/data/LSPdataset'
+# root_dir = r'D:\人体重复运动计数\LSPdataset'
 train_video_dir = 'train'
 train_label_dir = 'train.csv'
 valid_video_dir = 'valid'
@@ -223,10 +217,10 @@ NUM_FRAME = 32
 
 train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
-my_model = TransferModel(config=config, checkpoint=checkpoint)
+my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME)
 NUM_EPOCHS = 50
 LR = 1e-4
 
-train_loss, valid_loss = train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
-                                    batch_size=1, lr=LR, saveCkpt=True, ckpt_name='1101',
-                                    log_dir='scalar1101')
+train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
+           batch_size=2, lr=LR, saveCkpt=True, ckpt_name='1103',
+           log_dir='scalar1103')
