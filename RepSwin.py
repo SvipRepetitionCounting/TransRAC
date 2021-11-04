@@ -1,4 +1,4 @@
-"""Repnet based on swin-t"""
+"""Repnet model based on swin-t"""
 from mmcv import Config
 from mmaction.models import build_model
 from mmcv.runner import load_checkpoint
@@ -110,6 +110,8 @@ class TransEncoder(nn.Module):
 
 
 class Prediction(nn.Module):
+    ''' 全连接预测网络 '''
+
     def __init__(self, input_dim, n_hidden_1, n_hidden_2, out_dim):
         super(Prediction, self).__init__()
         self.layers = nn.Sequential(
@@ -157,7 +159,7 @@ class TransferModel(nn.Module):
         self.ln1 = nn.LayerNorm(512)
 
         self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1)
-        self.FC = Prediction(self.num_frames * 512, 2048, 512, self.num_frames)
+        self.FC = Prediction(1 * 512, 1024, 512, 1)  # 1104 输出为1
 
     def load_model(self):
         cfg = Config.fromfile(self.config)
@@ -170,7 +172,7 @@ class TransferModel(nn.Module):
     def forward(self, x):
         with autocast():
             batch_size, c, num_frames, h, w = x.shape
-            scales = [1]
+            scales = [1]  # 目前的尺度为1
             multi_scales = []
             for scale in scales:
                 if scale != 1:
@@ -180,7 +182,7 @@ class TransferModel(nn.Module):
                     crops = [x[:, :, i:i + scale, :, :] for i in
                              range(0, self.num_frames - scale + padding_size * 2, max(scale // 2, 1))]
                 else:
-                    crops = [x[:, :, i:i+1, :, :] for i in range(0, self.num_frames)]
+                    crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
                 slice = []
                 for crop in crops:
                     crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
@@ -208,17 +210,17 @@ class TransferModel(nn.Module):
             x = x.flatten(start_dim=2)  # ->[b,f,32*f]
             x = F.relu(self.input_projection(x))  # ->[b,f, 512]
             x = self.ln1(x)
-            print('projection ',x.shape)
 
             x = x.transpose(0, 1)  # [f,b,512]
-            x = self.transEncoder(x)  # ->[b,f, 512]
-            x = x.transpose(0, 1)
-            print('encoder ', x.shape)
-            x = x.flatten(1)  # ->[b,f*512]
-            x = self.FC(x)  # ->[b,f]
+            x = self.transEncoder(x)  #
+            x = x.transpose(0, 1)  # ->[b,f, 512]
+
+            # x = x.flatten(1)  # ->[b,f*512]
+            x = self.FC(x)  # ->[b,f,1]
+
+            x = x.view(batch_size, self.num_frames)
 
             return x
-
 
 # root_dir = r'D:\人体重复运动计数\LSPdataset'
 # train_video_dir = 'train'
@@ -231,7 +233,7 @@ class TransferModel(nn.Module):
 #
 # dummy_x = torch.rand(2, 3, 8, 224, 224)
 # NUM_FRAME = 8
-# train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
+# # train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 # my_model = TransferModel(config=config, checkpoint=checkpoint,num_frames=NUM_FRAME)
 # # trainloader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
 # # for input, target in trainloader:

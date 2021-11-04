@@ -219,8 +219,8 @@ train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
 my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME)
 NUM_EPOCHS = 50
-LR = 1e-4
+LR = 1e-5
 
 train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
-           batch_size=2, lr=LR, saveCkpt=True, ckpt_name='1103',
-           log_dir='scalar1103')
+           batch_size=4, lr=LR, saveCkpt=True, ckpt_name='1104',
+           log_dir='scalar1104')
