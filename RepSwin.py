@@ -111,6 +111,7 @@ class TransEncoder(nn.Module):
 
 class Prediction(nn.Module):
     ''' 全连接预测网络 '''
+
     def __init__(self, input_dim, n_hidden_1, n_hidden_2, out_dim):
         super(Prediction, self).__init__()
         self.layers = nn.Sequential(
@@ -168,7 +169,7 @@ class TransferModel(nn.Module):
         print('--------- backbone loaded ------------')
         return backbone
 
-    def forward(self, x):
+    def forward(self, x, epoch):
         with autocast():
             batch_size, c, num_frames, h, w = x.shape
             scales = [1]  # 目前的尺度为1
@@ -183,10 +184,16 @@ class TransferModel(nn.Module):
                 else:
                     crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
                 slice = []
-                for crop in crops:
-                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                if epoch < 5:
+                    with torch.no_grad():
+                        for crop in crops:
+                            crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                            slice.append(crop)
+                else:
+                    for crop in crops:
+                        crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                        slice.append(crop)
 
-                    slice.append(crop)
                 x_scale = torch.cat(slice, dim=2)  # ->[b,768,f,size,size]
                 x_scale = F.relu(self.bn1(self.conv3D(x_scale)))  # ->[b,512,f,7,7]
                 # print(x_scale.shape)
@@ -220,7 +227,6 @@ class TransferModel(nn.Module):
             x = x.view(batch_size, self.num_frames)
 
             return x
-
 
 # root_dir = r'D:\人体重复运动计数\LSPdataset'
 # train_video_dir = 'train'

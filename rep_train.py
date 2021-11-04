@@ -18,7 +18,7 @@ device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() 
 torch.manual_seed(1)
 
 
-def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, batch_size=4, lr=1e-3,
+def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, batch_size=4, lr=1e-4,
                ckpt_name='ckpt',
                lastCkptPath=None, saveCkpt=False, log_dir='scalar'):
     """
@@ -87,11 +87,11 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     model.train()
                     torch.cuda.empty_cache()
                     optimizer.zero_grad()
+                    acc = 0
                     input = input.to(device)
                     density = target.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
-                    acc = 0
-                    output = model(input)
+                    output = model(input, epoch)
                     predict_count = torch.sum(output, dim=1).round()
                     predict_density = output
                     loss1 = lossMSE(predict_density, density)
@@ -100,10 +100,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                             predict_count.flatten().shape[0]  # mae
                     loss = loss1 + loss2  # 1104: l1+l2
 
-                    gaps = torch.abs(torch.sub((predict_count > 0), count)).reshape(-1).cpu().detach().numpy().reshape(
-                        -1).tolist()
+                    gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
-                        if item <= 1:
+                        if abs(item) <= 1:
                             acc += 1
                     OBO = acc / predict_count.flatten().shape[0]
                     trainOBO.append(OBO)
@@ -148,7 +147,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     density = target.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
 
-                    output = model(input)
+                    output = model(input, epoch)
                     predict_count = torch.sum(output, dim=1).round()
                     predict_density = output
 
@@ -212,7 +211,7 @@ valid_label_dir = 'valid.csv'
 config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
 checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
 
-NUM_FRAME = 32
+NUM_FRAME = 64
 
 train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
@@ -222,4 +221,4 @@ LR = 1e-5
 
 train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
            batch_size=4, lr=LR, saveCkpt=True, ckpt_name='1104',
-           log_dir='scalar1104')
+           log_dir='scalar1104_2')
