@@ -187,7 +187,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
         scheduler.step()
         lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
 
-        if saveCkpt and epoch % 30 == 0:
+        if saveCkpt and epoch % 29 == 0:
             checkpoint = {
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
@@ -196,7 +196,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                 'valLosses': validLosses
             }
             torch.save(checkpoint,
-                       'checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
+                       '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
 
         writer.add_scalars('learning rate',
                            {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']},

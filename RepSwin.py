@@ -111,7 +111,6 @@ class TransEncoder(nn.Module):
 
 class Prediction(nn.Module):
     ''' 全连接预测网络 '''
-
     def __init__(self, input_dim, n_hidden_1, n_hidden_2, out_dim):
         super(Prediction, self).__init__()
         self.layers = nn.Sequential(
@@ -216,11 +215,12 @@ class TransferModel(nn.Module):
             x = x.transpose(0, 1)  # ->[b,f, 512]
 
             # x = x.flatten(1)  # ->[b,f*512]
-            x = self.FC(x)  # ->[b,f,1]
+            x = self.FC(x)  # ->[b,f,1]  1104 update : [b,f*num]->[b,f,1]
 
             x = x.view(batch_size, self.num_frames)
 
             return x
+
 
 # root_dir = r'D:\人体重复运动计数\LSPdataset'
 # train_video_dir = 'train'

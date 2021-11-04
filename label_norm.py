@@ -1,4 +1,3 @@
-'''label 转换为高斯分布密度图 '''
 from scipy import integrate
 import math
 import numpy as np
@@ -24,11 +23,13 @@ def normalize_label(y_frame, y_length):
         x_b = y_frame[i + 1]
         avg = (x_b + x_a) / 2
         sig = (x_b - x_a) / 6
-        num = x_b - x_a  # 帧数量
-        for j in range(num):
-            x_1 = x_a - 0.5 + j
-            x_2 = x_a + 0.5 + j
-            # TODO： 优化函数，时间复杂度降低为O(1)
-            y_ing = get_integrate(x_1, x_2, avg, sig)
-            y_label[x_a + j] = y_ing
+        num = x_b - x_a + 1  # 帧数量 update 1104
+        if num != 1:
+            for j in range(num):
+                x_1 = x_a - 0.5 + j
+                x_2 = x_a + 0.5 + j
+                y_ing = get_integrate(x_1, x_2, avg, sig)
+                y_label[x_a + j] = y_ing
+        else:
+            y_label[x_a] = 1
     return y_label
