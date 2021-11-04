@@ -110,6 +110,7 @@ class TransEncoder(nn.Module):
 
 
 class Prediction(nn.Module):
+    '''全连接预测网络'''
     def __init__(self, input_dim, n_hidden_1, n_hidden_2, out_dim):
         super(Prediction, self).__init__()
         self.layers = nn.Sequential(
@@ -160,6 +161,7 @@ class TransferModel(nn.Module):
         self.FC = Prediction(self.num_frames * 512, 2048, 512, self.num_frames)
 
     def load_model(self):
+        '''加载预训练模型'''
         cfg = Config.fromfile(self.config)
         model = build_model(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
         load_checkpoint(model, self.checkpoint, map_location='cpu')
