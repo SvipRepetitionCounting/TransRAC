@@ -2,7 +2,15 @@
 Raw video-swin-transformer please click [raw video-swin-transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)
 Environment installing please refers to it.  
 
-my enviroment   
+### train  
+` python rep_train.py ` 
+
+[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
+
+### Neural Network structure   
+[Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
+
+### enviroment   
 
 pytorch1.7.0  
 cuda 11.0
@@ -45,18 +53,12 @@ pip install einops
 ### dataset 
 
 LSP dataset  include
->total 962 videos
->test 124 videos 
+>total 962 videos  
+>test 124 videos   
 
 We are constantly updating! 
 
-### train  
-` python rep_train.py ` 
 
-[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
-
-### Neural Network structure   
-[Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
 
 
 
