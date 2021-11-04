@@ -35,9 +35,9 @@ pip install kornia==0.5.0
 LSP dataset  
 total 962 videos 
 
-### train
+### train  
 
-`python rep_train.py`
+` python rep_train.py ` 
 
 [train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
 
