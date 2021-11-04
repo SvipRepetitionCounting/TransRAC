@@ -1,3 +1,4 @@
+'''label 转换为高斯分布密度图 '''
 from scipy import integrate
 import math
 import numpy as np
