@@ -2,8 +2,10 @@
 Raw video-swin-transformer please click [raw video-swin-transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)
 Environment installing please refers to it.  
 
-key enviroment pytorch1.7+  
-cuda 10.2-11.0
+my enviroment   
+
+pytorch1.7.0  
+cuda 11.0
 
 ### install mmcv
 ```shell
@@ -26,16 +28,29 @@ pip install -r requirements/build.txt
 pip install -v -e .  # or "python setup.py develop"
 ```
 
-`pip install kornia==0.5.0 ` 
+```
+pip install kornia==0.5.0  
 
+pip install tqdm   
+
+pip install tensorboardX  
+
+pip install timm  
+
+pip install einops  
+
+```
   
 
 ### dataset 
-LSP dataset  
-total 962 videos 
+
+LSP dataset  include
+>total 962 videos
+>test 124 videos 
+
+We are constantly updating! 
 
 ### train  
-
 ` python rep_train.py ` 
 
 [train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
