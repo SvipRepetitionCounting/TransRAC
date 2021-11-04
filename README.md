@@ -36,6 +36,7 @@ pip install -r requirements/build.txt
 pip install -v -e .  # or "python setup.py develop"
 ```
 
+### other dependency
 ```
 pip install kornia==0.5.0  
 
