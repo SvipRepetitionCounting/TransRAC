@@ -210,12 +210,12 @@ class TransferModel(nn.Module):
             x = x.flatten(start_dim=2)  # ->[b,f,32*f]
             x = F.relu(self.input_projection(x))  # ->[b,f, 512]
             x = self.ln1(x)
-            print('projection ',x.shape)
+            #print('projection ',x.shape)
 
             x = x.transpose(0, 1)  # [f,b,512]
             x = self.transEncoder(x)  # ->[b,f, 512]
             x = x.transpose(0, 1)
-            print('encoder ', x.shape)
+            #print('encoder ', x.shape)
             x = x.flatten(1)  # ->[b,f*512]
             x = self.FC(x)  # ->[b,f]
 
