@@ -40,8 +40,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
 
     """
     currEpoch = 0
-    trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
-    validloader = DataLoader(valid_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=20)
+    validloader = DataLoader(valid_set, batch_size=batch_size, shuffle=True, num_workers=20)
     model = MMDataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
     lr_list = []
@@ -98,9 +98,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     loss2 = lossSL1(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = 5 * loss1 + loss2 + loss3  # 1029: 5*l1+l2 + l3
+                    loss = loss1 + loss2  # 1104: l1+l2
 
-                    gaps = torch.abs(torch.sub((predict_count>0), count)).reshape(-1).cpu().detach().numpy().reshape(
+                    gaps = torch.abs(torch.sub((predict_count > 0), count)).reshape(-1).cpu().detach().numpy().reshape(
                         -1).tolist()
                     for item in gaps:
                         if item <= 1:
@@ -156,9 +156,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     loss2 = lossSL1(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = 5 * loss1 + loss2 + loss3
+                    loss = loss1 + loss2  # 1104 loss=loss1+loss2
 
-                    # loss = loss1
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
                         if abs(item) <= 1:
