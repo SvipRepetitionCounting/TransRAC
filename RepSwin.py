@@ -1,4 +1,4 @@
-"""Repnet model based on swin-t"""
+"""Repnet based on swin-t"""
 from mmcv import Config
 from mmaction.models import build_model
 from mmcv.runner import load_checkpoint
@@ -10,6 +10,7 @@ import numpy as np
 from LSPloader import MyData
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+from timm.models.layers import trunc_normal_
 
 
 class attention(nn.Module):
@@ -124,11 +125,22 @@ class Prediction(nn.Module):
             nn.Dropout(p=0.25, inplace=False),
             nn.Linear(n_hidden_2, out_dim)
         )
+        self.apply(self._init_weights)
 
     def forward(self, x):
         # x = x.flatten(start_dim=1)
         x = self.layers(x)
         return x
+
+    def _init_weights(self, m):
+        """ 权重初始化 """
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight, std=.02)
+            if isinstance(m, nn.Linear) and m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
 
 
 class TransferModel(nn.Module):
@@ -137,7 +149,11 @@ class TransferModel(nn.Module):
         self.num_frames = num_frames
         self.config = config
         self.checkpoint = checkpoint
+        self.scales = [1, 4, 8]  # 多尺度
         self.backbone = self.load_model()
+        self.Replication_padding1 = nn.ReplicationPad3d((0, 0, 0, 0, 1, 1))
+        self.Replication_padding2 = nn.ReplicationPad3d((0, 0, 0, 0, 2, 2))
+        self.Replication_padding4 = nn.ReplicationPad3d((0, 0, 0, 0, 4, 4))
         self.conv3D = nn.Conv3d(in_channels=768,
                                 out_channels=512,
                                 kernel_size=3,
@@ -147,7 +163,7 @@ class TransferModel(nn.Module):
         self.SpatialPooling = nn.MaxPool3d(kernel_size=(1, 7, 7))
 
         self.sims = Similarity_matrix()
-        self.conv3x3 = nn.Conv2d(in_channels=4 * 1,  # num_head*scale_num TODO:scale_num
+        self.conv3x3 = nn.Conv2d(in_channels=4 * len(self.scales),  # num_head*scale_num
                                  out_channels=32,
                                  kernel_size=3,
                                  padding=1)
@@ -159,7 +175,8 @@ class TransferModel(nn.Module):
         self.ln1 = nn.LayerNorm(512)
 
         self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1)
-        self.FC = Prediction(1 * 512, 1024, 512, 1)  # 1104 输出为1
+        self.FC = Prediction(512, 512, 256, 1)  # 1104 输出为1
+        self.apply(self._init_weights)
 
     def load_model(self):
         cfg = Config.fromfile(self.config)
@@ -172,19 +189,21 @@ class TransferModel(nn.Module):
     def forward(self, x, epoch):
         with autocast():
             batch_size, c, num_frames, h, w = x.shape
-            scales = [1]  # 目前的尺度为1
             multi_scales = []
-            for scale in scales:
-                if scale != 1:
-                    padding_size = scale // 2
-                    zero_padding = torch.zeros(batch_size, c, padding_size, h, w)  # temporal zero padding
-                    x = torch.cat((zero_padding, x, zero_padding), dim=2)
+            for scale in self.scales:
+                if scale == 4:
+                    x = self.Replication_padding2(x)
                     crops = [x[:, :, i:i + scale, :, :] for i in
-                             range(0, self.num_frames - scale + padding_size * 2, max(scale // 2, 1))]
+                             range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
+                elif scale == 8:
+                    x = self.Replication_padding4(x)
+                    crops = [x[:, :, i:i + scale, :, :] for i in
+                             range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
                 else:
                     crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
+
                 slice = []
-                if epoch < 5:
+                if epoch < 50:
                     with torch.no_grad():
                         for crop in crops:
                             crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
@@ -222,11 +241,20 @@ class TransferModel(nn.Module):
             x = x.transpose(0, 1)  # ->[b,f, 512]
 
             # x = x.flatten(1)  # ->[b,f*512]
-            x = self.FC(x)  # ->[b,f,1]  1104 update : [b,f*num]->[b,f,1]
+            x = self.FC(x)  # ->[b,f,1]
 
             x = x.view(batch_size, self.num_frames)
 
             return x
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight, std=.02)
+            if isinstance(m, nn.Linear) and m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
 
 # root_dir = r'D:\人体重复运动计数\LSPdataset'
 # train_video_dir = 'train'
