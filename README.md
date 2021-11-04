@@ -40,7 +40,8 @@ total 962 videos
 
 [train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
 
-Neural Network structure  [Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
+### Neural Network structure   
+[Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
 
 
 
