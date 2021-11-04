@@ -12,7 +12,6 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7
 
 See [here](https://github.com/open-mmlab/mmcv#installation) for different versions of MMCV compatible to different PyTorch and CUDA versions.
 
-```   
 ### Clone the MMAction2 repository.
 
 ```shell
@@ -27,9 +26,9 @@ pip install -r requirements/build.txt
 pip install -v -e .  # or "python setup.py develop"
 ```
 
-pip install kornia==0.5.0  
+`pip install kornia==0.5.0 ` 
 
-```  
+  
 
 ### dataset 
 LSP dataset  
