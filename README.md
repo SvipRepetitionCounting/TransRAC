@@ -40,13 +40,7 @@ pip install -v -e .  # or "python setup.py develop"
 ```
 pip install kornia==0.5.0  
 
-pip install tqdm   
-
-pip install tensorboardX  
-
-pip install timm  
-
-pip install einops  
+pip install tqdm tensorboardX timm einops
 
 ```
   
