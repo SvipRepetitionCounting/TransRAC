@@ -74,6 +74,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
     for epoch in tqdm(range(currEpoch, n_epochs + currEpoch)):
         trainLosses = []
         validLosses = []
+        trainLoss1 = []
+        validLoss1 = []
         trainOBO = []
         validOBO = []
         trainMAE = []
@@ -110,8 +112,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     trainMAE.append(MAE)
 
                     batch_loss = loss.item()
-
+                    batch_loss1 = loss1.item()
                     trainLosses.append(batch_loss)
+                    trainLoss1.append(batch_loss1)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
                                       'loss_train': batch_loss,
@@ -122,6 +125,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     if batch_idx % 10 == 0:
                         writer.add_scalars('train/loss',
                                            {"loss": np.mean(trainLosses)},
+                                           epoch * len(trainloader) + batch_idx)
+                        writer.add_scalars('train/loss1',
+                                           {"loss1": np.mean(trainLoss1)},
                                            epoch * len(trainloader) + batch_idx)
                         writer.add_scalars('train/MAE',
                                            {"MAE": np.mean(trainMAE)},
@@ -166,8 +172,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     MAE = loss3.item()
                     validMAE.append(MAE)
                     batch_loss = loss.item()
+                    batch_loss1 = loss1.item()
                     validLosses.append(batch_loss)
-
+                    validLoss1.append(batch_loss1)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
                                       'loss_valid': batch_loss,
@@ -175,6 +182,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                                       'Valid OBO ': OBO})
 
                     writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
+                                       epoch * len(validloader) + batch_idx)
+                    writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
                                        epoch * len(validloader) + batch_idx)
                     writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
                                        epoch * len(validloader) + batch_idx)
@@ -218,7 +227,8 @@ valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM
 my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME)
 NUM_EPOCHS = 50
 LR = 1e-5
+BATCH_SIZE = 4
 
 train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
-           batch_size=2, lr=LR, saveCkpt=True, ckpt_name='1104',
-           log_dir='scalar1104_3')
+           batch_size=BATCH_SIZE, lr=LR, saveCkpt=True, ckpt_name='1105_1_64',
+           log_dir='scalar1105_1')
