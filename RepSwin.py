@@ -27,7 +27,6 @@ class attention(nn.Module):
         # q: [B, head, F, model_dim]
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.scale)  # [B,Head, F, F]
         if attn_mask:
-            # 给需要mask的地方设置一个负无穷
             scores = scores.masked_fill_(attn_mask, -np.inf)
         scores = self.softmax(scores)
         scores = self.dropout(scores)  # [B,head, F, F]
