@@ -202,7 +202,7 @@ class TransferModel(nn.Module):
                     crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
 
                 slice = []
-                if epoch < 50:
+                if epoch < 100:
                     with torch.no_grad():
                         for crop in crops:
                             crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst

@@ -20,7 +20,7 @@ torch.manual_seed(1)
 
 def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, batch_size=4, lr=1e-4,
                ckpt_name='ckpt',
-               lastCkptPath=None, saveCkpt=False, log_dir='scalar'):
+               lastCkptPath=None, saveCkpt=False, log_dir='/p300'):
     """
     Args:
         n_epochs:
@@ -40,14 +40,14 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
 
     """
     currEpoch = 0
-    trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=20)
-    validloader = DataLoader(valid_set, batch_size=batch_size, shuffle=True, num_workers=20)
+    trainloader = DataLoader(train_set, batch_size=batch_size,pin_memory=True, shuffle=True, num_workers=20)
+    validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=True,shuffle=True, num_workers=20)
     model = MMDataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
     lr_list = []
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 30], gamma=0.8)  # three step decay
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[40, 80], gamma=0.8)  # three step decay
 
-    writer = SummaryWriter(log_dir=log_dir)
+    writer = SummaryWriter(log_dir=os.path.join('/p300/log/',log_dir))
     scaler = GradScaler()
 
     if lastCkptPath != None:
@@ -100,7 +100,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     loss2 = lossSL1(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = loss1 + loss2  # 1104: l1+l2
+                    loss = loss1  # 1104: l1+l2
 
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
@@ -126,9 +126,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                         writer.add_scalars('train/loss',
                                            {"loss": np.mean(trainLosses)},
                                            epoch * len(trainloader) + batch_idx)
-                        writer.add_scalars('train/loss1',
-                                           {"loss1": np.mean(trainLoss1)},
-                                           epoch * len(trainloader) + batch_idx)
+                        # writer.add_scalars('train/loss1',
+                        #                    {"loss1": np.mean(trainLoss1)},
+                        #                    epoch * len(trainloader) + batch_idx)
                         writer.add_scalars('train/MAE',
                                            {"MAE": np.mean(trainMAE)},
                                            epoch * len(trainloader) + batch_idx)
@@ -147,7 +147,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                 pbar = tqdm(validloader, total=len(validloader))
                 for input, target in pbar:
                     model.eval()
-                    torch.cuda.empty_cache()
                     acc = 0
                     input = input.to(device)
                     density = target.to(device)
@@ -161,7 +160,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     loss2 = lossSL1(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = loss1 + loss2  # 1104 loss=loss1+loss2
+                    loss = loss1 # 1104 loss=loss1+loss2
 
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
@@ -183,8 +182,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
 
                     writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
                                        epoch * len(validloader) + batch_idx)
-                    writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
-                                       epoch * len(validloader) + batch_idx)
+                    # writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
+                    #                    epoch * len(validloader) + batch_idx)
                     writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
                                        epoch * len(validloader) + batch_idx)
                     writer.add_scalars('valid/MAE',
@@ -194,13 +193,14 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
         scheduler.step()
         lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
 
-        if saveCkpt and epoch % 29 == 0:
+        if saveCkpt and (epoch+1) % 10 == 0:
             checkpoint = {
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'trainLosses': trainLosses,
-                'valLosses': validLosses
+                'valLosses': validLosses,
+                'model': model
             }
             torch.save(checkpoint,
                        '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
@@ -219,16 +219,16 @@ valid_label_dir = 'valid.csv'
 
 config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
 checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
-
+lastckpt = '/p300/checkpoint/1105_1_64_9.pt'
 NUM_FRAME = 64
 
 train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
 my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME)
-NUM_EPOCHS = 50
+NUM_EPOCHS = 100
 LR = 1e-5
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 
 train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
            batch_size=BATCH_SIZE, lr=LR, saveCkpt=True, ckpt_name='1105_1_64',
-           log_dir='scalar1105_1')
+           log_dir='scalar1105_1', lastCkptPath=lastckpt)
