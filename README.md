@@ -53,6 +53,9 @@ LSP dataset  include
 
 We are constantly updating! 
 
+### experiment notes
+[11.04](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1104.md)
+[11.05](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1105.md)
 
 
 
