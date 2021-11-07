@@ -91,9 +91,9 @@ class PositionalEncoding(nn.Module):
 
 
 class TransEncoder(nn.Module):
-    def __init__(self, d_model, n_head, dim_ff, dropout=0.0, num_layers=1):
+    def __init__(self, d_model, n_head, dim_ff, dropout=0.0, num_layers=1, num_frames=64):
         super(TransEncoder, self).__init__()
-        self.pos_encoder = PositionalEncoding(d_model, 0.1, 64)
+        self.pos_encoder = PositionalEncoding(d_model, 0.1, num_frames)
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=d_model,
                                                    nhead=n_head,
@@ -173,7 +173,7 @@ class TransferModel(nn.Module):
         self.input_projection = nn.Linear(self.num_frames * 32, 512)  #
         self.ln1 = nn.LayerNorm(512)
 
-        self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1)
+        self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1,num_frames=self.num_frames)
         self.FC = Prediction(512, 512, 256, 1)  # 1104 输出为1
         self.apply(self._init_weights)
 
@@ -255,25 +255,3 @@ class TransferModel(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-# root_dir = r'D:\人体重复运动计数\LSPdataset'
-# train_video_dir = 'train'
-# train_label_dir = 'train.csv'
-# valid_video_dir = 'valid'
-# valid_label_dir = 'valid.csv'
-#
-# config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
-# checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
-#
-# dummy_x = torch.rand(2, 3, 8, 224, 224)
-# NUM_FRAME = 8
-# # train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
-# my_model = TransferModel(config=config, checkpoint=checkpoint,num_frames=NUM_FRAME)
-# # trainloader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
-# # for input, target in trainloader:
-# #     print('input',input.shape)
-# #     out=my_model(input)
-# #     break
-# out=my_model(dummy_x)
-# print(out.shape)
-# count = torch.sum(out, dim=1).round()
-# print(count)

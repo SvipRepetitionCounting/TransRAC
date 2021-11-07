@@ -87,7 +87,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
             for input, target in pbar:
                 with autocast():
                     model.train()
-                    torch.cuda.empty_cache()
                     optimizer.zero_grad()
                     acc = 0
                     input = input.to(device)
