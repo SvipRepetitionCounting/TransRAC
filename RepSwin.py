@@ -1,16 +1,15 @@
 """Repnet based on swin-t"""
-from mmcv import Config
-from mmaction.models import build_model
-from mmcv.runner import load_checkpoint
+import math
+
+import numpy as np
 import torch
 import torch.nn as nn
-import math
-from torch.cuda.amp import autocast
-import numpy as np
-from LSPloader import MyData
-from torch.utils.data import DataLoader
 import torch.nn.functional as F
+from mmcv import Config
+from mmcv.runner import load_checkpoint
 from timm.models.layers import trunc_normal_
+
+from mmaction.models import build_model
 
 
 class attention(nn.Module):
@@ -173,7 +172,8 @@ class TransferModel(nn.Module):
         self.input_projection = nn.Linear(self.num_frames * 32, 512)  #
         self.ln1 = nn.LayerNorm(512)
 
-        self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1,num_frames=self.num_frames)
+        self.transEncoder = TransEncoder(d_model=512, n_head=4, dropout=0.2, dim_ff=512, num_layers=1,
+                                         num_frames=self.num_frames)
         self.FC = Prediction(512, 512, 256, 1)  # 1104 输出为1
         self.apply(self._init_weights)
 
@@ -186,65 +186,64 @@ class TransferModel(nn.Module):
         return backbone
 
     def forward(self, x, epoch):
-        with autocast():
-            batch_size, c, num_frames, h, w = x.shape
-            multi_scales = []
-            for scale in self.scales:
-                if scale == 4:
-                    x = self.Replication_padding2(x)
-                    crops = [x[:, :, i:i + scale, :, :] for i in
-                             range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
-                elif scale == 8:
-                    x = self.Replication_padding4(x)
-                    crops = [x[:, :, i:i + scale, :, :] for i in
-                             range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
-                else:
-                    crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
+        batch_size, c, num_frames, h, w = x.shape
+        multi_scales = []
+        for scale in self.scales:
+            if scale == 4:
+                x = self.Replication_padding2(x)
+                crops = [x[:, :, i:i + scale, :, :] for i in
+                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
+            elif scale == 8:
+                x = self.Replication_padding4(x)
+                crops = [x[:, :, i:i + scale, :, :] for i in
+                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
+            else:
+                crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
 
-                slice = []
-                if epoch < 100:
-                    with torch.no_grad():
-                        for crop in crops:
-                            crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
-                            slice.append(crop)
-                else:
+            slice = []
+            if epoch < 100:
+                with torch.no_grad():
                     for crop in crops:
                         crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
                         slice.append(crop)
+            else:
+                for crop in crops:
+                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                    slice.append(crop)
 
-                x_scale = torch.cat(slice, dim=2)  # ->[b,768,f,size,size]
-                x_scale = F.relu(self.bn1(self.conv3D(x_scale)))  # ->[b,512,f,7,7]
-                # print(x_scale.shape)
-                x_scale = self.SpatialPooling(x_scale)  # ->[b,512,f,1,1]
-                x_scale = x_scale.squeeze(3).squeeze(3)  # -> [b,512,f]
-                x_scale = x_scale.transpose(1, 2)  # -> [b,32,512]
-                x_scale = x_scale.reshape(batch_size, self.num_frames, -1)  # -> [b,f,512]
+            x_scale = torch.cat(slice, dim=2)  # ->[b,768,f,size,size]
+            x_scale = F.relu(self.bn1(self.conv3D(x_scale)))  # ->[b,512,f,7,7]
+            # print(x_scale.shape)
+            x_scale = self.SpatialPooling(x_scale)  # ->[b,512,f,1,1]
+            x_scale = x_scale.squeeze(3).squeeze(3)  # -> [b,512,f]
+            x_scale = x_scale.transpose(1, 2)  # -> [b,32,512]
+            x_scale = x_scale.reshape(batch_size, self.num_frames, -1)  # -> [b,f,512]
 
-                # -------- similarity matrix ---------
-                x_sims = F.relu(self.sims(x_scale, x_scale, x_scale))  # -> [b,4,f,f]
-                multi_scales.append(x_sims)
+            # -------- similarity matrix ---------
+            x_sims = F.relu(self.sims(x_scale, x_scale, x_scale))  # -> [b,4,f,f]
+            multi_scales.append(x_sims)
 
-            x = torch.cat(multi_scales, dim=1)  # [B,4*scale_num,f,f]
-            x_matrix = x
-            x = F.relu(self.bn2(self.conv3x3(x)))  # [b,32,f,f]
-            x = self.dropout1(x)
+        x = torch.cat(multi_scales, dim=1)  # [B,4*scale_num,f,f]
+        x_matrix = x
+        x = F.relu(self.bn2(self.conv3x3(x)))  # [b,32,f,f]
+        x = self.dropout1(x)
 
-            x = x.permute(0, 2, 3, 1)  # [b,f,f,32]
-            # --------- transformer encoder ------
-            x = x.flatten(start_dim=2)  # ->[b,f,32*f]
-            x = F.relu(self.input_projection(x))  # ->[b,f, 512]
-            x = self.ln1(x)
+        x = x.permute(0, 2, 3, 1)  # [b,f,f,32]
+        # --------- transformer encoder ------
+        x = x.flatten(start_dim=2)  # ->[b,f,32*f]
+        x = F.relu(self.input_projection(x))  # ->[b,f, 512]
+        x = self.ln1(x)
 
-            x = x.transpose(0, 1)  # [f,b,512]
-            x = self.transEncoder(x)  #
-            x = x.transpose(0, 1)  # ->[b,f, 512]
+        x = x.transpose(0, 1)  # [f,b,512]
+        x = self.transEncoder(x)  #
+        x = x.transpose(0, 1)  # ->[b,f, 512]
 
-            # x = x.flatten(1)  # ->[b,f*512]
-            x = self.FC(x)  # ->[b,f,1]
+        # x = x.flatten(1)  # ->[b,f*512]
+        x = self.FC(x)  # ->[b,f,1]
 
-            x = x.view(batch_size, self.num_frames)
+        x = x.view(batch_size, self.num_frames)
 
-            return x
+        return x
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
@@ -254,4 +253,3 @@ class TransferModel(nn.Module):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
-
