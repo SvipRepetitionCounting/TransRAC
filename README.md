@@ -10,6 +10,11 @@ Environment installing please refers to it.
 ### Neural Network structure   
 [Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
 
+### experiment notes
+[11.04](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1104.md)  
+
+[11.05](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1105.md)
+
 ### enviroment   
 
 pytorch1.7.0  
@@ -52,6 +57,7 @@ LSP dataset  include
 >test 124 videos   
 
 We are constantly updating! 
+
 
 
 
