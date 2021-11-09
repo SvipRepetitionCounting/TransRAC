@@ -4,8 +4,8 @@ from Model_inn import RepNet
 from Repnet_dataset import MyData
 from repnet_looping import train_loop
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-device_ids = [1]
+N_GPU=1
+device_ids = [i for i in range(N_GPU)]
 
 # root_dir = r'/p300/data/LSPdataset'
 root_dir = r'D:\人体重复运动计数\LSPdataset'

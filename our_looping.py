@@ -19,7 +19,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
     currEpoch = 0
     trainloader = DataLoader(train_set, batch_size=batch_size, pin_memory=True, shuffle=True, num_workers=20)
     validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=True, shuffle=True, num_workers=20)
-    model = MMDataParallel(model.to(device), device_ids=device_ids)
+    model = nn.DataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
     lr_list = []
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[40, 80], gamma=0.8)  # three step decay

@@ -9,14 +9,13 @@ import math
 class Sims(nn.Module):
     def __init__(self):
         super(Sims, self).__init__()
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.bn = nn.BatchNorm2d(1)
         
     def forward(self, x):
         '''(N, S, E)  --> (N, 1, S, S)'''
         f = x.shape[1]
         
-        I = torch.ones(f).to(self.device)
+        I = torch.ones(f)
         xr = torch.einsum('bfe,h->bhfe', (x, I))   #[x, x, x, x ....]  =>  xr[:,0,:,:] == x
         xc = torch.einsum('bfe,h->bfhe', (x, I))   #[x x x x ....]     =>  xc[:,:,0,:] == x
         diff = xr - xc
@@ -32,17 +31,15 @@ class ResNet50Bottom(nn.Module):
     def __init__(self):
         super(ResNet50Bottom, self).__init__()
         self.original_model = torchvision.models.resnet50(pretrained=True, progress=True)
-        self.activation = {}
-        h = self.original_model.layer3[2].register_forward_hook(self.getActivation('comp'))
-        
-    def getActivation(self, name):
-        def hook(model, input, output):
-            self.activation[name] = output
-        return hook
+        self.original_model.fc = nn.Identity()
+        self.original_model.avgpool = nn.Identity()
+        self.original_model.layer4 = nn.Identity()
+        self.original_model.layer3[3] = nn.Identity()
+        self.original_model.layer3[4] = nn.Identity()
+        self.original_model.layer3[5] = nn.Identity()
 
     def forward(self, x):
-        self.original_model(x)
-        output = self.activation['comp']
+        output = self.original_model(x)
         return output
 
 #---------------------------------------------------------------------------
@@ -92,12 +89,9 @@ class TransEncoder(nn.Module):
 class RepNet(nn.Module):
     def __init__(self, num_frames):
         super(RepNet, self).__init__()
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         
         self.num_frames = num_frames
         self.resnetBase = ResNet50Bottom()
-        
-        
         self.conv3D = nn.Conv3d(in_channels = 1024,
                                 out_channels = 512,
                                 kernel_size = 3,
@@ -140,11 +134,11 @@ class RepNet(nn.Module):
         batch_size, _, c, h, w = x.shape
         x = x.view(-1, c, h, w)
         x = self.resnetBase(x)
-        x = x.view(batch_size, self.num_frames, x.shape[1],  x.shape[2],  x.shape[3])
+        x = x.view(-1, self.num_frames, 1024, 7, 7)
         x = x.transpose(1, 2)
         x = F.relu(self.bn1(self.conv3D(x)))
                         
-        x = x.view(batch_size, 512, self.num_frames, 7, 7)
+        x = x.view(-1, 512, self.num_frames, 7, 7)
         x = self.pool(x).squeeze(3).squeeze(3)
         x = x.transpose(1, 2)                           #batch, num_frame, 512
         x = x.reshape(batch_size, self.num_frames, -1)

@@ -7,8 +7,8 @@ from LSPloader import MyData
 from RepSwin import TransferModel
 from our_looping import train_loop
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
-device_ids = [0, 2]
+N_GPU=1
+device_ids = [i for i in range(N_GPU)]
 
 root_dir = r'/p300/data/LSPdataset'
 # root_dir = r'D:\人体重复运动计数\LSPdataset'
