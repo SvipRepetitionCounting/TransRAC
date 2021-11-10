@@ -4,7 +4,7 @@ import os.path as osp
 import numpy as np
 from torch.utils.data import Dataset
 import torch
-
+from scipy.ndimage import zoom
 
 class MyData(Dataset):
     def __init__(self, root_path, video_path, label_path, num_frame):
@@ -43,6 +43,7 @@ class MyData(Dataset):
 def get_frames(npz_path):
     with np.load(npz_path) as data:
         frames = data['imgs']
+        frames=zoom(frames,(1,1,112/224,112/224))
         frames_length=data['fps'].item()
         frames = torch.FloatTensor(frames)
         frames -= 127.5

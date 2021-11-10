@@ -1,6 +1,6 @@
 """our method VST"""
 import os
-
+from my_tools import paint_smi_matrixs
 import numpy as np
 import torch
 import torch.nn as nn
@@ -69,7 +69,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     input = input.to(device)
                     density = target.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
-                    output = model(input, epoch)
+                    output,matrixs = model(input, epoch)
                     predict_count = torch.sum(output, dim=1).round()
                     predict_density = output
                     loss1 = lossMSE(predict_density, density)
@@ -126,7 +126,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     density = target.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
 
-                    output = model(input, epoch)
+                    output, sim_matrix = model(input, epoch)
                     predict_count = torch.sum(output, dim=1).round()
                     predict_density = output
 
@@ -178,7 +178,9 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
             }
             torch.save(checkpoint,
                        '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
+            paint_smi_matrixs(matrixs)
 
-        writer.add_scalars('learning rate',
-                           {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']},
-                           epoch)
+        writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
+        writer.add_scalars('epoch_MAE', {"epoch_MAE": MAE}, epoch)
+        writer.add_scalars('epoch_OBO', {"epoch_OBO": OBO}, epoch)
+        writer.add_scalars('epoch_loss', {"epoch_validloss": batch_loss}, epoch)

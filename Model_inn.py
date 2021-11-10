@@ -134,11 +134,11 @@ class RepNet(nn.Module):
         batch_size, _, c, h, w = x.shape
         x = x.view(-1, c, h, w)
         x = self.resnetBase(x)
-        x = x.view(-1, self.num_frames, 1024, 7, 7)
+        x = x.view(batch_size, self.num_frames, 1024, 7, 7)
         x = x.transpose(1, 2)
         x = F.relu(self.bn1(self.conv3D(x)))
                         
-        x = x.view(-1, 512, self.num_frames, 7, 7)
+        x = x.view(batch_size, 512, self.num_frames, 7, 7)
         x = self.pool(x).squeeze(3).squeeze(3)
         x = x.transpose(1, 2)                           #batch, num_frame, 512
         x = x.reshape(batch_size, self.num_frames, -1)

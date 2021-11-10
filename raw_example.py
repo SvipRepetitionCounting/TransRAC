@@ -9,9 +9,9 @@ initialize a SwinTransformer3D model
 model = SwinTransformer3D()
 print(model)
 
-dummy_x = torch.rand(1, 3, 1, 224, 224)
-logits = model(dummy_x)
-print(logits.shape)
+# dummy_x = torch.rand(1, 3, 1, 224, 224)
+# logits = model(dummy_x)
+# print(logits.shape)
 
 '''
 load the pretrained weight

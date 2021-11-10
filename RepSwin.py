@@ -142,12 +142,12 @@ class Prediction(nn.Module):
 
 
 class TransferModel(nn.Module):
-    def __init__(self, config, checkpoint, num_frames):
+    def __init__(self, config, checkpoint, num_frames,scales):
         super(TransferModel, self).__init__()
         self.num_frames = num_frames
         self.config = config
         self.checkpoint = checkpoint
-        self.scales = [1, 4, 8]  # 多尺度
+        self.scales = scales # 多尺度
         self.backbone = self.load_model()
         self.Replication_padding1 = nn.ReplicationPad3d((0, 0, 0, 0, 1, 1))
         self.Replication_padding2 = nn.ReplicationPad3d((0, 0, 0, 0, 2, 2))
@@ -180,7 +180,10 @@ class TransferModel(nn.Module):
     def load_model(self):
         cfg = Config.fromfile(self.config)
         model = build_model(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-        load_checkpoint(model, self.checkpoint, map_location='cpu')
+        if torch.cuda.is_available():
+            load_checkpoint(model, self.checkpoint)
+        else:
+            load_checkpoint(model, self.checkpoint, map_location='cpu')
         backbone = model.backbone
         print('--------- backbone loaded ------------')
         return backbone
@@ -243,7 +246,7 @@ class TransferModel(nn.Module):
 
         x = x.view(batch_size, self.num_frames)
 
-        return x
+        return x,x_matrix
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):

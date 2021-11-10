@@ -21,14 +21,15 @@ config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k
 checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
 lastckpt = '/p300/checkpoint/1105_1_64_9.pt'
 NUM_FRAME = 64
-
+SCALES=[1]
 train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
-my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME)
+my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME, scales=SCALES)
 NUM_EPOCHS = 100
 LR = 1e-5
 BATCH_SIZE = 1
 
-train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,
+
+train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset,train=True, valid=True,
            batch_size=BATCH_SIZE, lr=LR, saveCkpt=True, ckpt_name='1108_1',log_dir='scalar1108_1', lastCkptPath=lastckpt,
            device_ids=device_ids)

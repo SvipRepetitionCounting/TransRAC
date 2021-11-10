@@ -43,3 +43,11 @@ def trainTestSplit(dataset, TTR):
     trainDataset = torch.utils.data.Subset(dataset, range(0, int(TTR * len(dataset))))
     valDataset = torch.utils.data.Subset(dataset, range(int(TTR*len(dataset)), len(dataset)))
     return trainDataset, valDataset
+
+def paint_smi_matrixs(matrixs):
+    b,c,w,h=matrixs.shape
+    for i in range(c):
+        matrix = matrixs[0, i, :, :].detach().numpy()
+        plt.imshow(matrix)
+        plt.colorbar()
+        plt.savefig(fname="/p300/log/graph/matrixs/matrix{0}.png".format(str(i)),dpi=400)
