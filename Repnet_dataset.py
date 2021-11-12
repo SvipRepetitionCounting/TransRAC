@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import os.path as osp
 
@@ -25,19 +26,20 @@ class MyData(Dataset):
         """获取数据集中的item  """
         video_file_name = self.video_dir[inx]
         file_path = os.path.join(self.video_path, video_file_name)
-        video_tensor = get_frames(file_path)  # [f,c,224,224]
+        video_tensor, frames_length = get_frames(file_path)  # [f,c,224,224]
         if video_file_name in self.label_dict.keys():
             count = self.label_dict[video_file_name]['count']
             cycle = self.label_dict[video_file_name]['cycle']
+            cycle = preprocess(frames_length, cycle, num_frames=self.num_frame)
             y_length, y_onehot = generate_label(cycle, self.num_frame)
             y_length = torch.FloatTensor(y_length)
             y_onehot = torch.FloatTensor(y_onehot)
 
-            return [video_tensor, y_length, y_onehot]
+            return video_tensor, y_length, y_onehot
         else:
             label_dummy = torch.zeros([self.num_frame])
             print(video_file_name, 'not exist')
-            return [video_tensor, label_dummy]
+            return video_tensor, label_dummy
 
     def __len__(self):
         """返回数据集的大小"""
@@ -52,7 +54,7 @@ def get_frames(npz_path):
         frames = torch.FloatTensor(frames)
         frames -= 127.5
         frames /= 127.5
-    return frames
+    return frames, frames_length
 
 
 def get_labels_dict(path):
@@ -71,34 +73,57 @@ def get_labels_dict(path):
     return labels_dict
 
 
+def generate_label(frames, num_frames=64):
+    """
+    frames:[2,5,5,8,9,11]
+    num_frames: 12
+    dong
+    y1 = [0. 0. 3. 3. 3. 4. 4. 4. 4. 4. 4. 4. 4]
+    y2 = [0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1]
+
+    hu
+    y1 =[0, 0, 3, 3, 3, 3, 3, 3, 0, 2, 2, 0]
+    y2 = [0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0]
+    """
+    y1 = [0 for i in range(num_frames)]  # 坐标轴长度，即帧数
+    y2 = [0 for i in range(num_frames)]
+    i = 0
+    while i < len(frames):
+        j = i + 1
+        for k in range(frames[i], frames[j]):
+            if frames[j] - frames[i] != 0:
+                y1[k] = frames[j] - frames[i]
+                y2[k] = 1
+            else:
+                y1[k] = 1
+                y2[k] = 1
+        i += 2
+    y1 = np.array(y1).reshape(num_frames, -1)
+    y2 = np.array(y2).reshape(num_frames, -1)
+    return y1, y2
+
+
+def preprocess(length, crops, num_frames):
+    """
+    original cycle list to label
+    Args:
+        length: frame_length
+        crops: label point example [6 ,31, 44, 54] or [0]
+        num_frames: 64
+    Returns: [6,31,31,44,44,54]
+    """
+    new_crop = []
+    for i in range(len(crops)):  # frame_length -> 64
+        item = min(math.ceil((float((crops[i])) / float(length)) * num_frames), num_frames - 1)
+        new_crop.append(item)
+    new_crop = np.sort(new_crop)
+    if len(new_crop) % 2 != 0:
+        print('label process error')
+        raise
+
+    return new_crop
+
+
 def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
     if not osp.isfile(filename):
         raise FileNotFoundError(msg_tmpl.format(filename))
-
-
-def generate_label(frames, num_frames=64):
-    """
-    frames:[2,5,5,8,9,12]
-    num_frames: 64
-    y1 = [0. 0. 3. 3. 3. 4. 4. 4. 4. 4. 4. 4. 4. 0. 0. 0.]
-    y2 = [0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 0. 0. 0.]
-    """
-    y1 = np.zeros(num_frames, dtype=float)  # 坐标轴长度，即帧数
-    y2 = np.zeros(num_frames, dtype=float)
-    # for i in range(0,y_length.size,2):
-    for i in range(0, len(frames), 2):
-        x_a = frames[i]
-        x_b = frames[i + 1]
-        if i + 2 < num_frames.size:
-            if x_b == frames[i + 2]:
-                if x_a != x_b:
-                    x_b -= 1
-                elif frames[i + 2] != frames[i + 3]:
-                    frames[i + 2] += 1
-                else:
-                    continue
-        p = x_b - x_a + 1
-        for j in range(x_a, x_b + 1):
-            y1[j] = p
-            y2[j] = 1
-    return y1, y2

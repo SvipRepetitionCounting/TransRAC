@@ -17,8 +17,8 @@ def get_integrate(x_1, x_2, avg, sig):
 def normalize_label(y_frame, y_length):
     # y_length: 帧总数
     # return: normalize_label  size:narray(y_length,)
-    y_label = np.zeros(y_length, dtype=float)  # 坐标轴长度，即帧数
-    for i in range(0, y_frame.size, 2):
+    y_label = [0 for i in range(y_length)]  # 坐标轴长度，即帧数
+    for i in range(0, len(y_frame), 2):
         x_a = y_frame[i]
         x_b = y_frame[i + 1]
         avg = (x_b + x_a) / 2

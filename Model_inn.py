@@ -121,7 +121,7 @@ class RepNet(nn.Module):
         self.fc1_1 = nn.Linear(512, 512)
         self.ln1_2 = nn.LayerNorm(512)
         self.fc1_2 = nn.Linear(512, 512)
-        self.fc1_3 = nn.Linear(512, self.num_frames//2)
+        self.fc1_3 = nn.Linear(512, self.num_frames)
 
 
         #periodicity prediction
@@ -176,7 +176,8 @@ class RepNet(nn.Module):
         y2 = x2.transpose(0, 1)
         y2 = F.relu(self.ln2_2(self.fc2_1(y2)))
         y2 = F.relu(self.fc2_2(y2))
-        y2 = F.relu(self.fc2_3(y2)) 
+        y2 = F.relu(self.fc2_3(y2))
+        y2 = y2.view(batch_size, self.num_frames)  # [b,64,1]->[b,64]
         
         #y1 = y1.transpose(1, 2)                         #Cross enropy wants (minbatch*classes*dimensions)
         if ret_sims:

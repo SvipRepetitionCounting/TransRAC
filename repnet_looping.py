@@ -64,6 +64,10 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
     for epoch in tqdm(range(currEpoch, n_epochs + currEpoch)):
         trainLosses = []
         validLosses = []
+        trainLoss1 = []
+        validLoss1 = []
+        trainLoss2 = []
+        validLoss2 = []
         trainOBO = []
         validOBO = []
         trainMAE = []
@@ -81,8 +85,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     y1 = target1.to(device).float()  # [3,3,3,...]
                     y2 = target2.to(device).float()  # [1,1,1,...]
 
-                    y1pred, y2pred = model(input)  # y1 [B,64,32] y2 [B,64,1]
-                    loss1 = lossCE(y1pred, y1)  # softmax cross entropy
+                    y1pred, y2pred = model(input)  # y1 [B,64,32] y2 [B,64]
+                    loss1 = lossCE(y1pred.transpose(1, 2), y1.long())  # softmax cross entropy
                     loss2 = lossBCE(y2pred, y2)  # binary cross-entropy
                     y1pred = torch.argmax(y1pred, dim=2)
                     countpred = torch.sum((y2pred > 0) / (y1pred + 1e-1), 1)  # [b,1]
@@ -100,6 +104,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     trainMAE.append(MAE)
                     batch_loss = loss.item()
                     trainLosses.append(batch_loss)
+                    trainLoss1.append(loss1.item())
+                    trainLoss2.append(loss2.item())
 
                     del input, target1, target2, y1, y2, y1pred, y2pred
                     batch_idx += 1
@@ -109,8 +115,10 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                                       'Train OBO ': OBO})
 
                     if batch_idx % 10 == 0:
-                        writer.add_scalars('train/loss',
-                                           {"loss": np.mean(trainLosses)},
+                        writer.add_scalars('train/losses',
+                                           {"loss": np.mean(trainLosses),
+                                            "loss1": np.mean(trainLoss1),
+                                            "loss2": np.mean(trainLoss2)},
                                            epoch * len(trainloader) + batch_idx)
                         writer.add_scalars('train/MAE',
                                            {"MAE": np.mean(trainMAE)},
@@ -133,8 +141,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     y1 = target1.to(device).float()  # [3,3,3,...]
                     y2 = target2.to(device).float()  # [1,1,1,...]
 
-                    y1pred, y2pred = model(input)  # y1 [B,64,32] y2 [B,64,1]
-                    loss1 = lossCE(y1pred, y1)  # softmax cross entropy
+                    y1pred, y2pred = model(input)  # y1 [B,64,32] y2 [B,64]
+                    loss1 = lossCE(y1pred.transpose(1, 2), y1.long())  # softmax cross entropy
                     loss2 = lossBCE(y2pred, y2)  # binary cross-entropy
                     y1pred = torch.argmax(y1pred, dim=2)
                     countpred = torch.sum((y2pred > 0) / (y1pred + 1e-1), 1)  # [b,1]
@@ -152,7 +160,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     validMAE.append(MAE)
                     batch_loss = loss.item()
                     validLosses.append(batch_loss)
-
+                    validLoss1.append(loss1.item())
+                    validLoss2.append(loss2.item())
                     del input, target1, target2, y1, y2, y1pred, y2pred
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
@@ -160,12 +169,13 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                                       'Valid MAE': MAE,
                                       'Valid OBO ': OBO})
 
-                    writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
+                    writer.add_scalars('valid/losses', {"loss": np.mean(validLosses),
+                                                        "loss1": np.mean(validLoss1),
+                                                        "loss2": np.mean(validLoss2)},
                                        epoch * len(validloader) + batch_idx)
                     writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
                                        epoch * len(validloader) + batch_idx)
-                    writer.add_scalars('valid/MAE',
-                                       {"MAE": np.mean(validMAE)},
+                    writer.add_scalars('valid/MAE', {"MAE": np.mean(validMAE)},
                                        epoch * len(trainloader) + batch_idx)
 
         scheduler.step()
