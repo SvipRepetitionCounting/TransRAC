@@ -87,13 +87,13 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     MAE = loss3.item()
                     trainMAE.append(MAE)
 
-                    batch_loss = loss.item()
-                    batch_loss1 = loss1.item()
-                    trainLosses.append(batch_loss)
-                    trainLoss1.append(batch_loss1)
+                    train_loss = loss.item()
+                    train_loss1 = loss1.item()
+                    trainLosses.append(train_loss)
+                    trainLoss1.append(train_loss1)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
-                                      'loss_train': batch_loss,
+                                      'loss_train': train_loss,
                                       'Train MAE': MAE,
                                       'Train OBO ': OBO})
 
@@ -101,9 +101,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                         writer.add_scalars('train/loss',
                                            {"loss": np.mean(trainLosses)},
                                            epoch * len(trainloader) + batch_idx)
-                        # writer.add_scalars('train/loss1',
-                        #                    {"loss1": np.mean(trainLoss1)},
-                        #                    epoch * len(trainloader) + batch_idx)
                         writer.add_scalars('train/MAE',
                                            {"MAE": np.mean(trainMAE)},
                                            epoch * len(trainloader) + batch_idx)
@@ -144,13 +141,13 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     validOBO.append(OBO)
                     MAE = loss3.item()
                     validMAE.append(MAE)
-                    batch_loss = loss.item()
-                    batch_loss1 = loss1.item()
-                    validLosses.append(batch_loss)
-                    validLoss1.append(batch_loss1)
+                    train_loss = loss.item()
+                    train_loss1 = loss1.item()
+                    validLosses.append(train_loss)
+                    validLoss1.append(train_loss1)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
-                                      'loss_valid': batch_loss,
+                                      'loss_valid': train_loss,
                                       'Valid MAE': MAE,
                                       'Valid OBO ': OBO})
 
@@ -181,6 +178,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
             paint_smi_matrixs(matrixs)
 
         writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
-        writer.add_scalars('epoch_MAE', {"epoch_MAE": MAE}, epoch)
-        writer.add_scalars('epoch_OBO', {"epoch_OBO": OBO}, epoch)
-        writer.add_scalars('epoch_loss', {"epoch_validloss": batch_loss}, epoch)
+        writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)
+        writer.add_scalars('epoch_trainOBO', {"epoch_trainOBO": np.mean(trainOBO)}, epoch)
+        writer.add_scalars('epoch_trainloss', {"epoch_trainloss": np.mean(trainLosses)}, epoch)

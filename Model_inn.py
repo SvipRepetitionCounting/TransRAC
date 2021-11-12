@@ -120,15 +120,15 @@ class RepNet(nn.Module):
         #period length prediction
         self.fc1_1 = nn.Linear(512, 512)
         self.ln1_2 = nn.LayerNorm(512)
-        self.fc1_2 = nn.Linear(512, self.num_frames//2)
-        self.fc1_3 = nn.Linear(self.num_frames//2, 1)
+        self.fc1_2 = nn.Linear(512, 512)
+        self.fc1_3 = nn.Linear(512, self.num_frames//2)
 
 
         #periodicity prediction
         self.fc2_1 = nn.Linear(512, 512)
         self.ln2_2 = nn.LayerNorm(512)
-        self.fc2_2 = nn.Linear(512, self.num_frames//2)
-        self.fc2_3 = nn.Linear(self.num_frames//2, 1)
+        self.fc2_2 = nn.Linear(512, 512)
+        self.fc2_3 = nn.Linear(512, 1)
 
     def forward(self, x, ret_sims = False):
         batch_size, _, c, h, w = x.shape
