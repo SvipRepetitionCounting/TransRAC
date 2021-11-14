@@ -1,7 +1,10 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.lines import Line2D
 import torch
+from matplotlib.lines import Line2D
+
 
 def plot_grad_flow(named_parameters):
     '''Plots the gradients flowing through different layers in the net during training.
@@ -39,15 +42,34 @@ def plot_grad_flow(named_parameters):
                 Line2D([0], [0], color="r", lw=4)], ['max-gradient', 'mean-gradient', 'median-gradient'])
     plt.show()
 
+
 def trainTestSplit(dataset, TTR):
     trainDataset = torch.utils.data.Subset(dataset, range(0, int(TTR * len(dataset))))
-    valDataset = torch.utils.data.Subset(dataset, range(int(TTR*len(dataset)), len(dataset)))
+    valDataset = torch.utils.data.Subset(dataset, range(int(TTR * len(dataset)), len(dataset)))
     return trainDataset, valDataset
 
-def paint_smi_matrixs(matrixs):
-    b,c,w,h=matrixs.shape
+
+def paint_smi_matrixs(matrixs, index=0):
+    b, c, w, h = matrixs.shape
     for i in range(c):
-        matrix = matrixs[0, i, :, :].detach().numpy()
+        matrix = matrixs[0, i, :, :].detach().cpu().numpy()
         plt.imshow(matrix)
         plt.colorbar()
-        plt.savefig(fname="/p300/log/graph/matrixs/matrix{0}.png".format(str(i)),dpi=400)
+        dir = '/p300/graph/matrixs{0}'.format(index)
+        if not os.path.exists(dir):
+            os.mkdir('/p300/graph/matrixs{0}'.format(index))
+        plt.savefig(fname="/p300/graph/matrixs{0}/matrix{1}.png".format(index, str(i)), dpi=400)
+        plt.close()
+
+# from torchvision import \
+#
+#     write.add_image('img',make_grid(img,))
+
+
+def plot_inference(precount, count):
+    precount = precount.cpu()
+    count = count.cpu()
+    plt.plot(precount, color='blue')
+    plt.plot(count, color='red')
+    plt.savefig(fname="/p300/plot/inference.jpg", dpi=400)
+

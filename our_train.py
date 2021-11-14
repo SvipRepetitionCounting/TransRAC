@@ -17,14 +17,13 @@ train_label_dir = 'train.csv'
 valid_video_dir = 'valid'
 valid_label_dir = 'valid.csv'
 
-config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
 checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
 lastckpt = '/p300/checkpoint/1105_1_64_9.pt'
 NUM_FRAME = 64
 SCALES=[1]
 train_dataset = MyData(root_dir, train_video_dir, train_label_dir, num_frame=NUM_FRAME)
 valid_dataset = MyData(root_dir, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
-my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME, scales=SCALES)
+my_model = TransferModel(pretrain=checkpoint, num_frames=NUM_FRAME, scales=SCALES)
 NUM_EPOCHS = 100
 LR = 1e-5
 BATCH_SIZE = 1

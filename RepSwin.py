@@ -5,11 +5,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv import Config
-from mmcv.runner import load_checkpoint
 from timm.models.layers import trunc_normal_
-
-from mmaction.models import build_model
+from video_swin_transformer import SwinTransformer3D
 
 
 class attention(nn.Module):
@@ -142,11 +139,10 @@ class Prediction(nn.Module):
 
 
 class TransferModel(nn.Module):
-    def __init__(self, config, checkpoint, num_frames,scales):
+    def __init__(self, pretrain, num_frames,scales):
         super(TransferModel, self).__init__()
         self.num_frames = num_frames
-        self.config = config
-        self.checkpoint = checkpoint
+        self.checkpoint = pretrain
         self.scales = scales # 多尺度
         self.backbone = self.load_model()
         self.Replication_padding1 = nn.ReplicationPad3d((0, 0, 0, 0, 1, 1))
@@ -178,14 +174,15 @@ class TransferModel(nn.Module):
         self.apply(self._init_weights)
 
     def load_model(self):
-        cfg = Config.fromfile(self.config)
-        model = build_model(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
+        backbone = SwinTransformer3D()
+        net_dict = backbone.state_dict()
         if torch.cuda.is_available():
-            load_checkpoint(model, self.checkpoint)
+            pretrain = torch.load(self.checkpoint)
         else:
-            load_checkpoint(model, self.checkpoint, map_location='cpu')
-        backbone = model.backbone
-        print('--------- backbone loaded ------------')
+            pretrain = torch.load(self.checkpoint, map_location='cpu')
+        state_dict = {k: v for k, v in pretrain.items() if k in net_dict.keys()}
+        net_dict.update(state_dict)
+        backbone.load_state_dict(net_dict)
         return backbone
 
     def forward(self, x, epoch):
@@ -195,23 +192,23 @@ class TransferModel(nn.Module):
             if scale == 4:
                 x = self.Replication_padding2(x)
                 crops = [x[:, :, i:i + scale, :, :] for i in
-                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
+                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 4, 1))]
             elif scale == 8:
                 x = self.Replication_padding4(x)
                 crops = [x[:, :, i:i + scale, :, :] for i in
-                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 2, 1))]
+                         range(0, self.num_frames - scale + scale // 2 * 2, max(scale // 4, 1))]
             else:
                 crops = [x[:, :, i:i + 1, :, :] for i in range(0, self.num_frames)]
 
             slice = []
-            if epoch < 100:
+            if epoch < 200:
                 with torch.no_grad():
                     for crop in crops:
-                        crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                        crop = self.backbone(crop)  # ->[batch_size, 768, scale/4(up), 7, 7]  帧过vst
                         slice.append(crop)
             else:
                 for crop in crops:
-                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/2(up), 7, 7]  帧过vst
+                    crop = self.backbone(crop)  # ->[batch_size, 768, scale/4(up), 7, 7]  帧过vst
                     slice.append(crop)
 
             x_scale = torch.cat(slice, dim=2)  # ->[b,768,f,size,size]

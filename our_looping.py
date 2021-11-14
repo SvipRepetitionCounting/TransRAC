@@ -1,19 +1,17 @@
 """our method VST"""
 import os
-from my_tools import paint_smi_matrixs
 import numpy as np
 import torch
 import torch.nn as nn
-from mmcv.parallel import MMDataParallel
 from tensorboardX import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
+from my_tools import paint_smi_matrixs,plot_inference
 
 torch.manual_seed(1)
 
-def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, batch_size=1, lr=1e-5,
+def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, inference=False, batch_size=1, lr=1e-5,
                ckpt_name='ckpt', lastCkptPath=None, saveCkpt=False, log_dir='scalar', device_ids=[0]):
     device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() else "cpu")
     currEpoch = 0
@@ -57,6 +55,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
         validOBO = []
         trainMAE = []
         validMAE = []
+        predCount=[]
+        Count=[]
 
         if train:
             pbar = tqdm(trainloader, total=len(trainloader))
@@ -145,6 +145,12 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
                     train_loss1 = loss1.item()
                     validLosses.append(train_loss)
                     validLoss1.append(train_loss1)
+                    if inference:
+                        predCount.append(predict_count.item())
+                        Count.append(count.item())
+                        print('predict count :{0}, groundtruth :{1}'.format(predict_count.item(), count.item()))
+                        if predict_count.item()== count.item():
+                            paint_smi_matrixs(sim_matrix,batch_idx)
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
                                       'loss_valid': train_loss,
@@ -176,8 +182,12 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, ba
             torch.save(checkpoint,
                        '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
             paint_smi_matrixs(matrixs)
+    if inference:
+        print(len())
+        plot_inference(predict_count, count)
 
-        writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
-        writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)
-        writer.add_scalars('epoch_trainOBO', {"epoch_trainOBO": np.mean(trainOBO)}, epoch)
-        writer.add_scalars('epoch_trainloss', {"epoch_trainloss": np.mean(trainLosses)}, epoch)
+
+        # writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
+        # writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)
+        # writer.add_scalars('epoch_trainOBO', {"epoch_trainOBO": np.mean(trainOBO)}, epoch)
+        # writer.add_scalars('epoch_trainloss', {"epoch_trainloss": np.mean(trainLosses)}, epoch)
