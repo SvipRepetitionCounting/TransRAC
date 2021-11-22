@@ -1,4 +1,4 @@
-"""基于video-swin-transformer的backbone模块"""
+"""TransRAC model """
 from mmcv import Config
 from mmaction.models import build_model
 from mmcv.runner import load_checkpoint
@@ -7,8 +7,6 @@ import torch.nn as nn
 import math
 from torch.cuda.amp import autocast
 import numpy as np
-from LSPloader import MyData
-from torch.utils.data import DataLoader
 import torch.nn.functional as F
 
 
@@ -139,9 +137,9 @@ class TransferModel(nn.Module):
         self.checkpoint = checkpoint
         self.scales = scales  # 目前的尺度为1
         self.backbone = self.load_model()
-        self.Replication_padding1 = nn.ReplicationPad3d((0, 0, 0, 0, 1, 1))
-        self.Replication_padding2 = nn.ReplicationPad3d((0, 0, 0, 0, 2, 2))
-        self.Replication_padding4 = nn.ReplicationPad3d((0, 0, 0, 0, 4, 4))
+        self.Replication_padding1 = nn.ConstantPad3d((0, 0, 0, 0, 1, 1),0)
+        self.Replication_padding2 = nn.ConstantPad3d((0, 0, 0, 0, 2, 2),0)
+        self.Replication_padding4 = nn.ConstantPad3d((0, 0, 0, 0, 4, 4),0)
         self.conv3D = nn.Conv3d(in_channels=768,
                                 out_channels=512,
                                 kernel_size=3,
@@ -206,7 +204,7 @@ class TransferModel(nn.Module):
                 # print(x_scale.shape)
                 x_scale = self.SpatialPooling(x_scale)  # ->[b,512,f,1,1]
                 x_scale = x_scale.squeeze(3).squeeze(3)  # -> [b,512,f]
-                x_scale = x_scale.transpose(1, 2)  # -> [b,32,512]
+                x_scale = x_scale.transpose(1, 2)  # -> [b,f,512]
                 x_scale = x_scale.reshape(batch_size, self.num_frames, -1)  # -> [b,f,512]
 
                 # -------- similarity matrix ---------
@@ -228,12 +226,11 @@ class TransferModel(nn.Module):
             x = self.transEncoder(x)  #
             x = x.transpose(0, 1)  # ->[b,f, 512]
 
-
             x = self.FC(x)  # ->[b,f,1]
 
             x = x.view(batch_size, self.num_frames)
 
-            return x,x_matrix
+            return x, x_matrix
 
 
 

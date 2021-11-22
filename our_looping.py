@@ -1,4 +1,4 @@
-"""our method VST"""
+"""training of TransRAC  """
 import os
 import numpy as np
 import torch
@@ -7,7 +7,7 @@ from tensorboardX import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from my_tools import paint_smi_matrixs,plot_inference
+from my_tools import paint_smi_matrixs
 
 torch.manual_seed(1)
 
@@ -15,8 +15,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                ckpt_name='ckpt', lastCkptPath=None, saveCkpt=False, log_dir='scalar', device_ids=[0]):
     device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() else "cpu")
     currEpoch = 0
-    trainloader = DataLoader(train_set, batch_size=batch_size, pin_memory=True, shuffle=True, num_workers=20)
-    validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=True, shuffle=True, num_workers=20)
+    trainloader = DataLoader(train_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=20)
+    validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=20)
     model = nn.DataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
     lr_list = []
@@ -55,8 +55,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
         validOBO = []
         trainMAE = []
         validMAE = []
-        predCount=[]
-        Count=[]
 
         if train:
             pbar = tqdm(trainloader, total=len(trainloader))
@@ -66,12 +64,13 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                     model.train()
                     optimizer.zero_grad()
                     acc = 0
-                    input = input.to(device)
-                    density = target.to(device)
+                    input = input.float().to(device)
+                    density = target.float().to(device)
                     count = torch.sum(target, dim=1).round().to(device)
-                    output,matrixs = model(input, epoch)
+                    output, matrixs = model(input, epoch)
                     predict_count = torch.sum(output, dim=1).round()
                     predict_density = output
+
                     loss1 = lossMSE(predict_density, density)
                     loss2 = lossSL1(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
@@ -145,27 +144,22 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                     train_loss1 = loss1.item()
                     validLosses.append(train_loss)
                     validLoss1.append(train_loss1)
-                    if inference:
-                        predCount.append(predict_count.item())
-                        Count.append(count.item())
-                        print('predict count :{0}, groundtruth :{1}'.format(predict_count.item(), count.item()))
-                        if predict_count.item()== count.item():
-                            paint_smi_matrixs(sim_matrix,batch_idx)
+
                     batch_idx += 1
                     pbar.set_postfix({'Epoch': epoch,
                                       'loss_valid': train_loss,
                                       'Valid MAE': MAE,
                                       'Valid OBO ': OBO})
 
-                    writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
-                                       epoch * len(validloader) + batch_idx)
-                    # writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
-                    #                    epoch * len(validloader) + batch_idx)
-                    writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
-                                       epoch * len(validloader) + batch_idx)
-                    writer.add_scalars('valid/MAE',
-                                       {"MAE": np.mean(validMAE)},
-                                       epoch * len(trainloader) + batch_idx)
+                writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
+                                   epoch)
+                # writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
+                #                    epoch * len(validloader) + batch_idx)
+                writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
+                                   epoch)
+                writer.add_scalars('valid/MAE',
+                                   {"MAE": np.mean(validMAE)},
+                                   epoch)
 
         scheduler.step()
         lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
@@ -182,12 +176,10 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
             torch.save(checkpoint,
                        '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
             paint_smi_matrixs(matrixs)
-    if inference:
-        print(len())
-        plot_inference(predict_count, count)
 
 
-        # writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
-        # writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)
-        # writer.add_scalars('epoch_trainOBO', {"epoch_trainOBO": np.mean(trainOBO)}, epoch)
-        # writer.add_scalars('epoch_trainloss', {"epoch_trainloss": np.mean(trainLosses)}, epoch)
+
+        writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
+        writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)
+        writer.add_scalars('epoch_trainOBO', {"epoch_trainOBO": np.mean(trainOBO)}, epoch)
+        writer.add_scalars('epoch_trainloss', {"epoch_trainloss": np.mean(trainLosses)}, epoch)

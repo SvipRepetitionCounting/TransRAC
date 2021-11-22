@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from matplotlib.lines import Line2D
+import seaborn as sns
 
 
 def plot_grad_flow(named_parameters):
@@ -50,6 +51,7 @@ def trainTestSplit(dataset, TTR):
 
 
 def paint_smi_matrixs(matrixs, index=0):
+    plt.clf()
     b, c, w, h = matrixs.shape
     for i in range(c):
         matrix = matrixs[0, i, :, :].detach().cpu().numpy()
@@ -61,10 +63,6 @@ def paint_smi_matrixs(matrixs, index=0):
         plt.savefig(fname="/p300/graph/matrixs{0}/matrix{1}.png".format(index, str(i)), dpi=400)
         plt.close()
 
-# from torchvision import \
-#
-#     write.add_image('img',make_grid(img,))
-
 
 def plot_inference(precount, count):
     precount = precount.cpu()
@@ -72,4 +70,16 @@ def plot_inference(precount, count):
     plt.plot(precount, color='blue')
     plt.plot(count, color='red')
     plt.savefig(fname="/p300/plot/inference.jpg", dpi=400)
+
+
+def density_map(maps,count,index):
+    plt.clf()
+    map=maps.detach().cpu().numpy().reshape(1,64)
+    sns.set()
+    fig = plt.figure(figsize=(64, 4))
+    sns_plot = sns.heatmap(map, xticklabels=False, cbar=False, cmap='Greens')
+    plt.savefig(fname="/p300/density_map/{0}_{1}.png".format(index, str(count)), dpi=400)
+    plt.close()
+
+
 
