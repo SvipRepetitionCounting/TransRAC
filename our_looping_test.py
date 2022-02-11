@@ -10,7 +10,7 @@ from my_tools import paint_smi_matrixs, plot_inference, density_map
 torch.manual_seed(1)
 
 
-def train_loop(n_epochs, model, test_set, inference=True, batch_size=1, lastckpt=None, paint=False, device_ids=[0]):
+def test_loop(n_epochs, model, test_set, inference=True, batch_size=1, lastckpt=None, paint=False, device_ids=[0]):
     device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() else "cpu")
     currEpoch = 0
     testloader = DataLoader(test_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=10)
