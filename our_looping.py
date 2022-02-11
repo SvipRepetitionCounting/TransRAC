@@ -83,10 +83,11 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                     # loss2 = lossMSE(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = 10 * loss1 + loss2  # 11:24 loss1+loss3
+                    loss = loss1
                     if mae_error:
                         loss += loss3
 
+                    # calculate MAE or OBO
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
                         if abs(item) <= 1:
@@ -141,7 +142,7 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                     # loss2 = lossMSE(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = 10 * loss1 + loss2  # 1104 loss=loss1+loss2
+                    loss = loss1
                     if mae_error:
                         loss += loss3
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
@@ -165,8 +166,6 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
 
                 writer.add_scalars('valid/loss', {"loss": np.mean(validLosses)},
                                    epoch)
-                # writer.add_scalars('valid/loss1', {"loss1": np.mean(validLoss1)},
-                #                    epoch * len(validloader) + batch_idx)
                 writer.add_scalars('valid/OBO', {"OBO": np.mean(validOBO)},
                                    epoch)
                 writer.add_scalars('valid/MAE',

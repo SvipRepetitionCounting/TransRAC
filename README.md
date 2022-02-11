@@ -10,7 +10,7 @@ Counting repetitive actions are widely seen in human activities such as physical
 ### Neural Network structure   
 [Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/TransRAC.py)  
 
-### Enviroment 
+### Enviroment
 pytorch1.7.0  
 mmcv 1.3.16  
 cuda 11.4  
