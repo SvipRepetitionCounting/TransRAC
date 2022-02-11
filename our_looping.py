@@ -1,4 +1,4 @@
-"""training of TransRAC  """
+"""train or valid looping """
 import os
 import numpy as np
 import torch
@@ -9,29 +9,35 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from my_tools import paint_smi_matrixs
 
-torch.manual_seed(1)
+torch.manual_seed(1)  # random seed. We not yet optimization it.
 
-def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, inference=False, batch_size=1, lr=1e-5,
-               ckpt_name='ckpt', lastCkptPath=None, saveCkpt=False, log_dir='scalar', device_ids=[0]):
+
+def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, inference=False, batch_size=1, lr=1e-6,
+               ckpt_name='ckpt', lastckpt=None, saveckpt=False, log_dir='scalar', device_ids=[0], mae_error=False):
     device = torch.device("cuda:" + str(device_ids[0]) if torch.cuda.is_available() else "cpu")
     currEpoch = 0
-    trainloader = DataLoader(train_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=20)
-    validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=20)
+    trainloader = DataLoader(train_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=16)
+    validloader = DataLoader(valid_set, batch_size=batch_size, pin_memory=False, shuffle=True, num_workers=16)
     model = nn.DataParallel(model.to(device), device_ids=device_ids)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
-    lr_list = []
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[40, 80], gamma=0.8)  # three step decay
+    milestones = [i for i in range(0, n_epochs, 40)]
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.8)  # three step decay
 
-    writer = SummaryWriter(log_dir=os.path.join('/p300/log/', log_dir))
+    writer = SummaryWriter(log_dir=os.path.join('log/', log_dir))
     scaler = GradScaler()
 
-    if lastCkptPath != None:
+    if lastckpt is not None:
         print("loading checkpoint")
-        checkpoint = torch.load(lastCkptPath)
+        checkpoint = torch.load(lastckpt)
         currEpoch = checkpoint['epoch']
-        trainLosses = checkpoint['trainLosses']
-        validLosses = checkpoint['valLosses']
+        # # # load hyperparameters by pytorch
+        # # # if change model
+        # net_dict=model.state_dict()
+        # state_dict={k: v for k, v in checkpoint.items() if k in net_dict.keys()}
+        # net_dict.update(state_dict)
+        # model.load_state_dict(net_dict, strict=False)
 
+        # # # or don't change model
         model.load_state_dict(checkpoint['state_dict'], strict=False)
 
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -55,6 +61,8 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
         validOBO = []
         trainMAE = []
         validMAE = []
+        predCount = []
+        Count = []
 
         if train:
             pbar = tqdm(trainloader, total=len(trainloader))
@@ -64,18 +72,20 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                     model.train()
                     optimizer.zero_grad()
                     acc = 0
-                    input = input.float().to(device)
-                    density = target.float().to(device)
-                    count = torch.sum(target, dim=1).round().to(device)
-                    output, matrixs = model(input, epoch)
-                    predict_count = torch.sum(output, dim=1).round()
+                    input = input.type(torch.FloatTensor).to(device)
+                    density = target.type(torch.FloatTensor).to(device)
+                    count = torch.sum(target, dim=1).type(torch.FloatTensor).round().to(device)
+                    output, matrixs = model(input)
+                    predict_count = torch.sum(output, dim=1).type(torch.FloatTensor).to(device)
                     predict_density = output
-
                     loss1 = lossMSE(predict_density, density)
                     loss2 = lossSL1(predict_count, count)
+                    # loss2 = lossMSE(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = loss1  # 1104: l1+l2
+                    loss = 10 * loss1 + loss2  # 11:24 loss1+loss3
+                    if mae_error:
+                        loss += loss3
 
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
@@ -111,27 +121,29 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                 scaler.step(optimizer)
                 scaler.update()
 
-        if valid:
+        if valid and epoch > 50:
             with torch.no_grad():
                 batch_idx = 0
                 pbar = tqdm(validloader, total=len(validloader))
                 for input, target in pbar:
                     model.eval()
                     acc = 0
-                    input = input.to(device)
-                    density = target.to(device)
-                    count = torch.sum(target, dim=1).round().to(device)
+                    input = input.type(torch.FloatTensor).to(device)
+                    density = target.type(torch.FloatTensor).to(device)
+                    count = torch.sum(target, dim=1).type(torch.FloatTensor).round().to(device)
 
-                    output, sim_matrix = model(input, epoch)
-                    predict_count = torch.sum(output, dim=1).round()
+                    output, sim_matrix = model(input)
+                    predict_count = torch.sum(output, dim=1).type(torch.FloatTensor).to(device)
                     predict_density = output
 
                     loss1 = lossMSE(predict_density, density)
                     loss2 = lossSL1(predict_count, count)
+                    # loss2 = lossMSE(predict_count, count)
                     loss3 = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \
                             predict_count.flatten().shape[0]  # mae
-                    loss = loss1  # 1104 loss=loss1+loss2
-
+                    loss = 10 * loss1 + loss2  # 1104 loss=loss1+loss2
+                    if mae_error:
+                        loss += loss3
                     gaps = torch.sub(predict_count, count).reshape(-1).cpu().detach().numpy().reshape(-1).tolist()
                     for item in gaps:
                         if abs(item) <= 1:
@@ -162,22 +174,20 @@ def train_loop(n_epochs, model, train_set, valid_set, train=True, valid=True, in
                                    epoch)
 
         scheduler.step()
-        lr_list.append(optimizer.state_dict()['param_groups'][0]['lr'])
-
-        if saveCkpt and (epoch + 1) % 10 == 0:
-            checkpoint = {
-                'epoch': epoch,
-                'state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'trainLosses': trainLosses,
-                'valLosses': validLosses,
-                'model': model
-            }
-            torch.save(checkpoint,
-                       '/p300/checkpoint/' + ckpt_name + '_' + str(epoch) + '.pt')
-            paint_smi_matrixs(matrixs)
-
-
+        if not os.path.exists('checkpoint/{0}/'.format(ckpt_name)):
+            os.mkdir('checkpoint/{0}/'.format(ckpt_name))
+        if saveckpt:
+            if (epoch < 50 and epoch % 5 == 0) or (epoch > 50 and epoch % 3 == 0):
+                checkpoint = {
+                    'epoch': epoch,
+                    'state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'trainLosses': trainLosses,
+                    'valLosses': validLosses
+                }
+                torch.save(checkpoint,
+                           'checkpoint/{0}/'.format(ckpt_name) + str(epoch) + '_' + str(
+                               round(np.mean(validMAE), 4)) + '.pt')
 
         writer.add_scalars('learning rate', {"learning rate": optimizer.state_dict()['param_groups'][0]['lr']}, epoch)
         writer.add_scalars('epoch_trainMAE', {"epoch_trainMAE": np.mean(trainMAE)}, epoch)

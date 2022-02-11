@@ -32,7 +32,7 @@ class attention(nn.Module):
 
 
 class Similarity_matrix(nn.Module):
-    '''buliding similarity matrix by self-attention mechanism '''
+    ''' buliding similarity matrix by self-attention mechanism '''
 
     def __init__(self, num_heads=4, model_dim=512):
         super().__init__()
@@ -170,15 +170,15 @@ class TransferModel(nn.Module):
         self.FC = Prediction(512, 512, 256, 1)  #
 
     def load_model(self):
-        ### load  pretrained model of video swin transformer using mmaction and mmcv API
+        # # # load  pretrained model of video swin transformer using mmaction and mmcv API
         cfg = Config.fromfile(self.config)
         model = build_model(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
 
-        ### load hyperparameters by mmcv api
+        # # # load hyperparameters by mmcv api
         # load_checkpoint(model, self.checkpoint, map_location='cpu')
         # backbone = model.backbone
 
-        ### load hyperparameters by pytorch
+        # # # load hyperparameters by pytorch
         loaded_ckpt = torch.load(self.checkpoint)
         backbone = model.backbone
         net_dict = backbone.state_dict()
