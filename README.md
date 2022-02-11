@@ -11,9 +11,9 @@
 
 ### enviroment   
 
-pytorch1.7.0
-mmcv 1.3.16
-cuda 11.4
+pytorch1.7.0  
+mmcv 1.3.16  
+cuda 11.4  
 
 ### install mmcv
 ```shell
