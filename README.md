@@ -1,24 +1,19 @@
-# SVIP_Counting
-Raw video-swin-transformer please click [raw video-swin-transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)
-Environment installing please refers to it.  
+# TransRAC
+##  Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting
 
 ### train  
-` python rep_train.py ` 
+` python our_train.py ` 
 
-[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/rep_train.py)  
+[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/our_train.py)  
 
 ### Neural Network structure   
-[Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/RepSwin.py)  
-
-### experiment notes
-[11.04](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1104.md)  
-
-[11.05](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/Experiment_notes/1105.md)
+[Network structure](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/TransRAC.py)  
 
 ### enviroment   
 
-pytorch1.7.0  
-cuda 11.0
+pytorch1.7.0
+mmcv 1.3.16
+cuda 11.4
 
 ### install mmcv
 ```shell
@@ -48,11 +43,10 @@ pip install kornia==0.5.0
 pip install tqdm tensorboardX timm einops
 
 ```
-  
 
-### dataset 
-
-LSP dataset  include
+### RepCount dataset 
+you can download data from https://anonymous.4open.science/r/RepCount/README.md  
+RepCount dataset include:
 >total 962 videos  
 >test 124 videos   
 
