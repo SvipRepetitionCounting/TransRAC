@@ -1,3 +1,4 @@
+""" some tools """
 import os
 
 import matplotlib.pyplot as plt
@@ -44,42 +45,36 @@ def plot_grad_flow(named_parameters):
     plt.show()
 
 
-def trainTestSplit(dataset, TTR):
-    trainDataset = torch.utils.data.Subset(dataset, range(0, int(TTR * len(dataset))))
-    valDataset = torch.utils.data.Subset(dataset, range(int(TTR * len(dataset)), len(dataset)))
-    return trainDataset, valDataset
-
-
 def paint_smi_matrixs(matrixs, index=0):
+    """paint similarity matrix (TSM/ KQ) """
     plt.clf()
     b, c, w, h = matrixs.shape
     for i in range(c):
         matrix = matrixs[0, i, :, :].detach().cpu().numpy()
         plt.imshow(matrix)
         plt.colorbar()
-        dir = '/p300/graph/matrixs{0}'.format(index)
+        dir = 'graph/matrixs{0}'.format(index)
         if not os.path.exists(dir):
-            os.mkdir('/p300/graph/matrixs{0}'.format(index))
-        plt.savefig(fname="/p300/graph/matrixs{0}/matrix{1}.png".format(index, str(i)), dpi=400)
+            os.mkdir('graph/matrixs{0}'.format(index))
+        plt.savefig(fname="graph/matrixs{0}/matrix{1}.png".format(index, str(i)), dpi=400)
         plt.close()
 
 
 def plot_inference(precount, count):
+    # plot count result
     precount = precount.cpu()
     count = count.cpu()
     plt.plot(precount, color='blue')
     plt.plot(count, color='red')
-    plt.savefig(fname="/p300/plot/inference.jpg", dpi=400)
+    plt.savefig(fname="plot/inference.jpg", dpi=400)
 
 
-def density_map(maps,count,index):
+def density_map(maps, count, index, file_name):
+    # paint density map
     plt.clf()
-    map=maps.detach().cpu().numpy().reshape(1,64)
+    map = maps.detach().cpu().numpy().reshape(1, 64)
     sns.set()
     fig = plt.figure(figsize=(64, 4))
     sns_plot = sns.heatmap(map, xticklabels=False, cbar=False, cmap='Greens')
-    plt.savefig(fname="/p300/density_map/{0}_{1}.png".format(index, str(count)), dpi=400)
+    plt.savefig(fname="density_map/{0}_{1}.png".format(file_name, index), dpi=500)
     plt.close()
-
-
-
