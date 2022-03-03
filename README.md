@@ -17,7 +17,8 @@ Counting repetitive actions are widely seen in human activities such as physical
 pytorch1.7.0  
 mmcv 1.3.16  
 cuda 11.4  
-apex(recommand)
+apex(recommand)  
+cv2
 
 ### install mmcv
 ```shell
