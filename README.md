@@ -29,7 +29,7 @@ Counting repetitive actions are widely seen in human activities such as physical
 
 ### Enviroment
 pytorch1.7.0  
-mmcv 1.3.16  
+mmcv-full 1.3.16  
 cuda 11.4  
 apex(recommand)  
 cv2
