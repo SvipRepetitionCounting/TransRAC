@@ -23,7 +23,7 @@ Counting repetitive actions are widely seen in human activities such as physical
 [Network architecture](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/TransRAC.py)  
 
 ## News
-
+- 2022-03-02: This paper has accepted on `CVPR 2022`
 
 ## Requirment 
 
