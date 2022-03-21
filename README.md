@@ -2,12 +2,12 @@
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 ```
-@inproceedings{hu2022tranrac,
+@inproceedings{hu2022transrac,
   author    = {Huazhang, Hu and
 	       Sixun, Dong and
                Yiqun, Zhao and
                Zhengxin, Li and
-               Dongze. Lian and
+               Dongze, Lian and
                Sheng hua, Gao},
   title     = {TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
   booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
