@@ -64,6 +64,7 @@ pip install tqdm tensorboardX timm einops
 
 ## RepCount dataset 
 We are updating Paper Link and the RepCount Download Link! PLS wait a little time.  
+[RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)
 RepCount dataset include:
 >total 962 videos  
 >test 124 videos   
