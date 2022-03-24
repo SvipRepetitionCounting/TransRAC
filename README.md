@@ -37,40 +37,14 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 We introduce a novel repetition action counting dataset called RepCount that contains videos with significant variations in length and allows for multiple kinds of anomaly cases. These video data collaborate with fine-grained annotations that indicate the beginning and end of each action period. Furthermore, the dataset consists of two subsets namely Part-A and Part-B. The videos in Part-A are fetched from YouTube, while the others in Part-B record simulated physical examinations by junior school students and teachers.   
  
 ------
-## Requirment 
+## Usage  
+### Install 
+Please refer to [install.md](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/install.md) for installation.
 
-### Enviroment
-pytorch1.7.0  
-mmcv-full 1.3.16  
-cuda 11.4  
-apex(recommand)  
-cv2
-
-### install mmcv
-```shell
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html  
-```  
-See [here](https://github.com/open-mmlab/mmcv#installation) for different versions of MMCV compatible to different PyTorch and CUDA versions.  
-
-### Clone the MMAction2 repository.
-```shell
-git clone https://github.com/open-mmlab/mmaction2.git
-cd mmaction2
-```
-Install build requirements and then install MMAction2.
-```shell
-pip install -r requirements/build.txt
-pip install -v -e .  # or "python setup.py develop"
-```
-
-### other dependency
-```
-pip install tqdm tensorboardX timm einops
-```
-## Train   
+### Train   
 ` python our_train.py `    
 
-----
+------
 
 We are constantly updating! 
 Welcome to cite and follow our work!
