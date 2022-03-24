@@ -63,7 +63,8 @@ pip install tqdm tensorboardX timm einops
 [train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/our_train.py)    
 
 ## [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)  
-The homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) has released! Welcome to citing!   
+The homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) has released! Welcome to citing! 
+![RepCount](https://github.com/svip-lab/svip-lab.github.io/blob/master/img/dataset/RepCount_dataset/1.jpg)
 ### Dataset introduction  
 We introduce a novel repetition action counting dataset called RepCount that contains videos with significant variations in length and allows for multiple kinds of anomaly cases. These video data collaborate with fine-grained annotations that indicate the beginning and end of each action period. Furthermore, the dataset consists of two subsets namely Part-A and Part-B. The videos in Part-A are fetched from YouTube, while the others in Part-B record simulated physical examinations by junior school students and teachers.   
 
