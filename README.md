@@ -17,7 +17,7 @@
 Official codes for CVPR 2022 paper "TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting"
 
 
-## News
+## 🌱News
 - 2022-03-22: The [Repition Action Counting Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) Homepage has released. 
 - 2022-03-02: This paper has accepted on `CVPR 2022`
 
@@ -67,11 +67,9 @@ pip install -v -e .  # or "python setup.py develop"
 ### other dependency
 ```
 pip install tqdm tensorboardX timm einops
-
 ```
 ## Train   
-` python our_train.py `  
-[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/our_train.py)    
+` python our_train.py `    
 
 ----
 
