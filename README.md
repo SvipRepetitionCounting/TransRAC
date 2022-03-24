@@ -23,7 +23,9 @@ Counting repetitive actions are widely seen in human activities such as physical
 [Network architecture](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/TransRAC.py)  
 
 ## News
+- 2022-03-22: The [Repition Action Counting Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) has released. 
 - 2022-03-02: This paper has accepted on `CVPR 2022`
+
 
 ## Requirment 
 
@@ -36,9 +38,9 @@ cv2
 
 ### install mmcv
 ```shell
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
+pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html  
 ```  
-See [here](https://github.com/open-mmlab/mmcv#installation) for different versions of MMCV compatible to different PyTorch and CUDA versions.
+See [here](https://github.com/open-mmlab/mmcv#installation) for different versions of MMCV compatible to different PyTorch and CUDA versions.  
 
 ### Clone the MMAction2 repository.
 ```shell
@@ -53,21 +55,18 @@ pip install -v -e .  # or "python setup.py develop"
 
 ### other dependency
 ```
-pip install kornia==0.5.0  
-
 pip install tqdm tensorboardX timm einops
 
 ```
 ## Train   
-` python our_train.py `
-[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/our_train.py)  
+` python our_train.py `  
+[train script](https://github.com/SvipRepetitionCounting/SVIP_Counting/blob/hhz/our_train.py)    
 
-## RepCount dataset 
-We are updating Paper Link and the RepCount Download Link! PLS wait a little time.  
-[RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)
-RepCount dataset include:
->total 962 videos  
->test 124 videos   
+## [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)  
+The homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) has released! Welcome to citing!   
+### Dataset introduction  
+We introduce a novel repetition action counting dataset called RepCount that contains videos with significant variations in length and allows for multiple kinds of anomaly cases. These video data collaborate with fine-grained annotations that indicate the beginning and end of each action period. Furthermore, the dataset consists of two subsets namely Part-A and Part-B. The videos in Part-A are fetched from YouTube, while the others in Part-B record simulated physical examinations by junior school students and teachers.   
+
 
 We are constantly updating! 
 Welcome to cite and follow our work!
