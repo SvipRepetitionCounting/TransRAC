@@ -24,8 +24,6 @@ class TestData(Dataset):
         self.num_frame = num_frame
 
     def __getitem__(self, inx):
-        """获取数据集中的item  """
-
         video_name= self.video_dir[inx]
         file_path = os.path.join(self.root_path, self.video_path, video_name)
         video_rd = VideoRead(file_path, num_frames=self.num_frame)

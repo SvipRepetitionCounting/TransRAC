@@ -1,9 +1,9 @@
 """train TransRAC model """
 from platform import node
 import os
-from RepCount_Loader import MyData
-from TransRAC import TransferModel
-from our_looping import train_loop
+from dataset.RepCountA_Loader import MyData
+from models.TransRAC import TransferModel
+from training.train_looping import train_loop
 
 # CUDA environment
 N_GPU = 4
@@ -21,11 +21,12 @@ train_label_dir = 'train.csv'
 valid_video_dir = 'valid'
 valid_label_dir = 'valid.csv'
 
-checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
+# please make sure the pretrained model path is correct
+checkpoint = './pretrained/swin_tiny_patch244_window877_kinetics400_1k.pth'
 config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
 
 # TransRAC model checkpoint
-lastckpt = 'checkpoint/ours/228_0.5419.pt'
+lastckpt = None
 
 NUM_FRAME = 64
 # multi scales(list). we currently support 1,4,8 scale.

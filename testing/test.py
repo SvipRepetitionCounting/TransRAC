@@ -1,9 +1,9 @@
 """test TransRAC model"""
 import os
 
-from RepCount_Loader import MyData
-from TransRAC import TransferModel
-from our_looping_test import test_loop
+from dataset.RepCountA_Loader import MyData
+from models.TransRAC import TransferModel
+from testing.test_looping import test_loop
 
 N_GPU = 1
 device_ids = [i for i in range(N_GPU)]
@@ -18,10 +18,10 @@ test_label_dir = 'test.csv'
 
 # video swin transformer pretrained model and config
 config = './configs/recognition/swin/swin_tiny_patch244_window877_kinetics400_1k.py'
-checkpoint = './checkpoints/swin_tiny_patch244_window877_kinetics400_1k.pth'
+checkpoint = './pretrained/swin_tiny_patch244_window877_kinetics400_1k.pth'
 
 # TransRAC model checkpoint
-lastckpt = 'checkpoint/ours/70_0.5441.pt'
+lastckpt = None
 
 NUM_FRAME = 64
 # multi scales(list). we currently support 1,4,8 scale.

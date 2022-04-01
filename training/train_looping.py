@@ -7,7 +7,7 @@ from tensorboardX import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from my_tools import paint_smi_matrixs
+from tools.my_tools import paint_smi_matrixs
 
 torch.manual_seed(1)  # random seed. We not yet optimization it.
 
