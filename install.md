@@ -1,9 +1,9 @@
 # Installment guidance
 
 ## Requirment 
-please refer to the [requirements.txt`](requirements.txt) file
+please refer to the [requirements.txt](requirements.txt) file.  
 ```
-pip install -r requirements.txt
+pip install -r requirements.txt 
 ```
 ### Enviroment
 pytorch 1.7.0  
