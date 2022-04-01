@@ -1,8 +1,12 @@
 # Installment guidance
 
 ## Requirment 
+please refer to the [requirements.txt`](requirements.txt) file
+```
+pip install -r requirements.txt
+```
 ### Enviroment
-pytorch1.7.0  
+pytorch 1.7.0  
 mmcv-full 1.3.16  
 cuda 11.4  
 apex(recommand)  
