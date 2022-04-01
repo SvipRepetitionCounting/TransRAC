@@ -28,7 +28,7 @@ We introduce a novel repetition action counting dataset called RepCount that con
 Please refer to [install.md](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/install.md) for installation.
 
 ### Train   
-` python our_train.py `    
+` python train.py `    
 
 ------
 
