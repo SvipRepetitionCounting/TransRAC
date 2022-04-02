@@ -1,4 +1,8 @@
-''' repcount data loader from fixed frames file(.npz) '''
+''' 
+repcount data loader from fixed frames file(.npz)
+if you don't pre-process the data file,for example,your raw file is .mp4,
+you can use the *RepCountA_raw_Loader.py*.
+'''
 import csv
 import os
 import os.path as osp
