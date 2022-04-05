@@ -6,6 +6,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 
 
 ## 🌱News
+- 2022-04-05: The arxiv preprint [Arxiv Version](https://arxiv.org/pdf/2204.01018.pdf) of the paper is available now. 
 - 2022-03-22: The [Repition Action Counting Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) Homepage is open for the community. 
 - 2022-03-02: This paper has been accepted by **`CVPR 2022`** as  **`Oral presentation`**
 
@@ -16,7 +17,7 @@ Counting repetitive actions are widely seen in human activities such as physical
 
 
 ## [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)    
-The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) has released. Welcome to citing! 
+The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) is available now. 
 ![RepCount](https://github.com/svip-lab/svip-lab.github.io/blob/master/img/dataset/RepCount_dataset/1.jpg)
 
 ### Dataset introduction  
@@ -35,12 +36,12 @@ Please refer to [install.md](https://github.com/SvipRepetitionCounting/TransRAC/
 
 If you have any questions, don't hesitate to contact us!
 
-If you find the project or the dataset is useful, please cite the paper.
+If you find the project or the dataset is useful, please consider citing the paper.
 
 ```
 @inproceedings{hu2022transrac,
   author    = {Huazhang, Hu and
-	       		Sixun, Dong and
+               Sixun, Dong and
                Yiqun, Zhao and
                Dongze, Lian and
                Zhengxin, Li and
