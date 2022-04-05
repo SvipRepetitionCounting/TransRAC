@@ -16,7 +16,7 @@ Counting repetitive actions are widely seen in human activities such as physical
 ![architecture](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/TransRAC_architecture.png)
 
 
-## [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html)    
+## RepCount Dataset   
 The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) is available now. 
 ![RepCount](https://github.com/svip-lab/svip-lab.github.io/blob/master/img/dataset/RepCount_dataset/1.jpg)
 
