@@ -39,16 +39,11 @@ If you have any questions, don't hesitate to contact us!
 If you find the project or the dataset is useful, please consider citing the paper.
 
 ```
-@inproceedings{hu2022transrac,
-  author    = {Huazhang, Hu and
-               Sixun, Dong and
-               Yiqun, Zhao and
-               Dongze, Lian and
-               Zhengxin, Li and
-               Sheng hua, Gao},
-  title     = {TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  year      = {2022}
+@article{hu2022transrac,
+  title={TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
+  author={Hu, Huazhang and Dong, Sixun and Zhao, Yiqun and Lian, Dongze and Li, Zhengxin and Gao, Shenghua},
+  journal={arXiv preprint arXiv:2204.01018},
+  year={2022}
 }
 ```
 
