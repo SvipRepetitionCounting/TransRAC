@@ -62,18 +62,18 @@ class VideoRead:
         return frames
 
     def crop_frame(self):
-        """to crop frames to new frames"""
+        """to crop frames to 64 frames"""
         frames = self.get_frame()
         frames_tensor = []
         if self.num_frames <= self.frame_length:
             for i in range(1, self.num_frames + 1):
-                frame = frames[i * len(frames) // self.num_frames - 1]
+                frame = frames[i * len(frames) // self.num_frames - 1]  # Proportional extraction (64 frames) 
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
                 # frame = transform(frame).unsqueeze(0)
                 frames_tensor.append(frame)
 
-        else:  # 当帧数不足时，补足帧数
+        else:  # if raw frames number lower than 64, padding it. 
             for i in range(self.frame_length):
                 frame = frames[i]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

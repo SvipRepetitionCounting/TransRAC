@@ -28,6 +28,12 @@ We introduce a novel repetition action counting dataset called RepCount that con
 ### Install 
 Please refer to [install.md](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/install.md) for installation.
 
+### data preparation
+Firstly, you should loading the pretrained model [Video Swin Transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)([github](https://github.com/SwinTransformer/storage/releases/download/v1.0.4/swin_tiny_patch244_window877_kinetics400_1k.pth)) in to the folder '[pretrained](https://github.com/SvipRepetitionCounting/TransRAC/tree/main/pretrained)'.
+
+Secondly, you should change the 'root_path' in [train.py](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/training/train.py) to your data path.
+
+We will upload the TransRAC trained model soon.
 ### Train   
 ` python train.py `    
 

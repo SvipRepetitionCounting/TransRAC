@@ -36,7 +36,7 @@ train_dataset = MyData(root_path, train_video_dir, train_label_dir, num_frame=NU
 valid_dataset = MyData(root_path, valid_video_dir, valid_label_dir, num_frame=NUM_FRAME)
 my_model = TransferModel(config=config, checkpoint=checkpoint, num_frames=NUM_FRAME, scales=SCALES, OPEN=False)
 NUM_EPOCHS = 200
-LR = 1e-5
+LR = 8e-6
 BATCH_SIZE = 32
 
 train_loop(NUM_EPOCHS, my_model, train_dataset, valid_dataset, train=True, valid=True,

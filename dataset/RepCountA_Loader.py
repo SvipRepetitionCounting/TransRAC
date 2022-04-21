@@ -1,5 +1,5 @@
 ''' 
-repcount data loader from fixed frames file(.npz)
+Repcount data loader from fixed frames file(.npz) which will be uploaded soon.
 if you don't pre-process the data file,for example,your raw file is .mp4,
 you can use the *RepCountA_raw_Loader.py*.
 '''
@@ -38,8 +38,8 @@ class MyData(Dataset):
         video_tensor, video_frame_length = get_frames(file_path)  # [f,c,224,224]
         video_tensor = video_tensor.transpose(0, 1)  # [64, 3, 224, 224] -> [ 3, 64, 224, 224]
         if video_file_name in self.label_dict.keys():
-            time_crops = self.label_dict[video_file_name]
-            label = preprocess(video_frame_length, time_crops, num_frames=self.num_frame)
+            time_points = self.label_dict[video_file_name]
+            label = preprocess(video_frame_length, time_points, num_frames=self.num_frame)
             label = torch.tensor(label)
             return [video_tensor, label]
         else:
@@ -55,7 +55,7 @@ def get_frames(npz_path):
     # get frames from .npz files
     with np.load(npz_path, allow_pickle=True) as data:
         frames = data['imgs']  # numpy.narray
-        frames_length = data['fps'].item()
+        frames_length = data['fps'].item()  # the raw video(.mp4) total frames number
         frames = torch.FloatTensor(frames)
         frames -= 127.5
         frames /= 127.5
@@ -78,18 +78,18 @@ def get_labels_dict(path):
     return labels_dict
 
 
-def preprocess(length, crops, num_frames):
+def preprocess(video_frame_length, time_points, num_frames):
     """
-    original cycle list to label
+    process label(.csv) to density map label
     Args:
-        length: frame_length
-        crops: label point example [6 ,31, 44, 54] or [0]
+        video_frame_length: video total frame number, i.e 1024frames
+        time_points: label point example [1, 23, 23, 40,45,70,.....] or [0]
         num_frames: 64
-    Returns: [6,31,31,44,44,54]
+    Returns: for example [0.1,0.8,0.1, .....]
     """
     new_crop = []
-    for i in range(len(crops)):  # frame_length -> 64
-        item = min(math.ceil((float((crops[i])) / float(length)) * num_frames), num_frames - 1)
+    for i in range(len(time_points)):  # frame_length -> 64
+        item = min(math.ceil((float((time_points[i])) / float(video_frame_length)) * num_frames), num_frames - 1)
         new_crop.append(item)
     new_crop = np.sort(new_crop)
     label = normalize_label(new_crop, num_frames)
