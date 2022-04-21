@@ -23,7 +23,6 @@ Pillow==9.0.1
 scikit_image==0.18.1
 scipy==1.6.2
 seaborn==0.11.1
-skimage==0.0
 sympy==1.8
 tensorboardX==2.5
 tensorrt==0.0.1
