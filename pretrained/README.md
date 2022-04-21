@@ -1,0 +1,1 @@
+you need load the pretrained model (video swin transformer) checkpoint.
