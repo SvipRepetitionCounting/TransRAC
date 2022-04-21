@@ -35,7 +35,7 @@ class MyData(Dataset):
         """
         video_file_name = self.video_dir[inx]
         file_path = os.path.join(self.video_path, video_file_name)
-        video_tensor, video_frame_length = get_frames(file_path)  # [f,c,224,224]
+        video_tensor, video_frame_length = get_frames(file_path)  # [64, 3, 224, 224]
         video_tensor = video_tensor.transpose(0, 1)  # [64, 3, 224, 224] -> [ 3, 64, 224, 224]
         if video_file_name in self.label_dict.keys():
             time_points = self.label_dict[video_file_name]
@@ -54,7 +54,7 @@ class MyData(Dataset):
 def get_frames(npz_path):
     # get frames from .npz files
     with np.load(npz_path, allow_pickle=True) as data:
-        frames = data['imgs']  # numpy.narray
+        frames = data['imgs']  # numpy.narray [64, 3, 224, 224]
         frames_length = data['fps'].item()  # the raw video(.mp4) total frames number
         frames = torch.FloatTensor(frames)
         frames -= 127.5
