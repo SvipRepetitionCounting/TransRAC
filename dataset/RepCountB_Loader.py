@@ -9,13 +9,6 @@ import torch
 
 class TestData(Dataset):
     def __init__(self, root_path, video_path, label_path, num_frame):
-        """
-        Args:
-            root_path:
-            video_path:
-            label_path:
-            num_frame:
-        """
         self.root_path = root_path
         self.video_path = video_path
         self.label_dir = os.path.join(root_path, label_path)
@@ -40,7 +33,7 @@ class TestData(Dataset):
 
 
 class VideoRead:
-    def __init__(self, video_path, num_frames):
+    def __init__(self, video_path, num_frames=64):
         self.video_path = video_path
         self.frame_length = 0
         self.num_frames = num_frames
@@ -60,18 +53,19 @@ class VideoRead:
         return frames
 
     def crop_frame(self):
-        """to crop frames to new frames"""
-        frames = self.get_frame()
+        """to crop frames to tensor [64, 3, 224, 224]"""
+        frames = self.get_frame()  # frames: the all frames of video
         frames_tensor = []
-        if self.num_frames <= self.frame_length:
-            for i in range(1, self.num_frames + 1):
-                frame = frames[i * len(frames) // self.num_frames - 1]
+        if self.num_frames <= len(frames):
+            for i in range(self.num_frames):
+                #  select 64 frames from total original frames, proportionally
+                frame = frames[i * len(frames) // self.num_frames]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
                 # frame = transform(frame).unsqueeze(0)
                 frames_tensor.append(frame)
 
-        else:  # 当帧数不足时，补足帧数
+        else:   # if raw frames number lower than 64, padding it. 
             for i in range(self.frame_length):
                 frame = frames[i]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
