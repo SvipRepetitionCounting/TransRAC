@@ -164,27 +164,6 @@ class MyDataset(Dataset):
                     frames_adjust.append(frame)
         return frames_adjust  # [f,h,w,3]
 
-    def adjust_label(self, label, frame_length, num_frames):
-        """
-        original cycle list to label
-        Args:
-            frame_length: frame_length
-            label: label point example [6,31,31,44,44,54] or [0]
-            num_frames: 64
-        Returns: [6,31,31,44,44,54]
-        """
-        new_crop = []
-        for i in range(len(label)):  # frame_length -> 64
-            item = min(math.ceil((float(label[i]) / float(frame_length)) * num_frames), num_frames - 1)
-            new_crop.append(item)
-        # new_crop = np.sort(new_crop)
-        new_crop = np.asarray(new_crop)
-        # new_label = normalize_label(new_crop, num_frames)
-        y1, y2, num_period = rep_label(new_crop, num_frames)
-        y1_tensor = torch.LongTensor(y1)
-        y2_tensor = torch.LongTensor(y2)
-        return y1_tensor, y2_tensor, num_period
-
 
 if __name__ == '__main__':
     data_root = r'/p300/LLSP'
