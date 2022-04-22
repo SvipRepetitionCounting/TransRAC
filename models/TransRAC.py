@@ -175,16 +175,16 @@ class TransferModel(nn.Module):
         model = build_model(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
 
         # # # load hyperparameters by mmcv api
-        # load_checkpoint(model, self.checkpoint, map_location='cpu')
-        # backbone = model.backbone
+        load_checkpoint(model, self.checkpoint, map_location='cpu')
+        backbone = model.backbone
 
         # # # load hyperparameters by pytorch
-        loaded_ckpt = torch.load(self.checkpoint)
-        backbone = model.backbone
-        net_dict = backbone.state_dict()
-        state_dict = {k: v for k, v in loaded_ckpt.items() if k in net_dict.keys()}
-        net_dict.update(state_dict)
-        backbone.load_state_dict(net_dict, strict=False)
+        # loaded_ckpt = torch.load(self.checkpoint)
+        # backbone = model.backbone
+        # net_dict = backbone.state_dict()
+        # state_dict = {k: v for k, v in loaded_ckpt.items() if k in net_dict.keys()}
+        # net_dict.update(state_dict)
+        # backbone.load_state_dict(net_dict, strict=False)
 
         print('--------- backbone loaded ------------')
 

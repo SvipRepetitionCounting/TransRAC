@@ -36,7 +36,7 @@ def test_loop(n_epochs, model, test_set, inference=True, batch_size=1, lastckpt=
                     acc = 0
                     input = input.to(device)
                     count = torch.sum(target, dim=1).round().to(device)
-                    output, sim_matrix = model(input, epoch)
+                    output, sim_matrix = model(input)
                     predict_count = torch.sum(output, dim=1).round()
 
                     mae = torch.sum(torch.div(torch.abs(predict_count - count), count + 1e-1)) / \

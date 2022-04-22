@@ -13,7 +13,7 @@ from torch.utils.data import Dataset
 import torch
 import csv
 import kornia
-from label_norm import normalize_label
+from .label_norm import normalize_label
 
 
 class MyData(Dataset):

@@ -11,7 +11,7 @@ import math
 
 from torch.utils.data import Dataset, DataLoader
 import torch
-from dataset.label_norm import normalize_label
+from .label_norm import normalize_label
 
 
 class MyData(Dataset):
