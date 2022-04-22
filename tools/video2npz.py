@@ -128,8 +128,8 @@ class MyDataset(Dataset):
                     frames.append(frame_rgb)
             cap.release()
             original_frames_length = len(frames)
-
-            frames = np.asarray(frames)  # [f,hw,,c]
+            # frames = self.adjust_frames(frames)  # uncomment to adjust frames
+            frames = np.asarray(frames)  # [f,h,w,c]
             if (frames.size != 0):
                 frames = frames.transpose(0, 3, 2, 1)  # [f,c,h,w]
             else:
@@ -143,13 +143,18 @@ class MyDataset(Dataset):
         return 1
 
     def adjust_frames(self, frames):
+        """
+        # adjust the number of total video frames to the target frame num.
+        :param frames: original frames
+        :return: target number of frames
+        """
         frames_adjust = []
         frame_length = len(frames)
         if self.num_frames <= len(frames):
             for i in range(1, self.num_frames + 1):
                 frame = frames[i * frame_length // self.num_frames - 1]
                 frames_adjust.append(frame)
-        else:  # 当帧数不足时，补足帧数
+        else:
             for i in range(frame_length):
                 frame = frames[i]
                 frames_adjust.append(frame)
@@ -157,7 +162,7 @@ class MyDataset(Dataset):
                 if len(frames) > 0:
                     frame = frames[-1]
                     frames_adjust.append(frame)
-        return frames_adjust  # [f,w,h,3]
+        return frames_adjust  # [f,h,w,3]
 
     def adjust_label(self, label, frame_length, num_frames):
         """
