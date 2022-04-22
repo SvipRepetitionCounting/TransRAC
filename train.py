@@ -1,11 +1,11 @@
 """train TransRAC model """
 from platform import node
 import os
-## if your data is .mp4 form, please use RepCountA_raw_Loader.py
+## if your data is .mp4 form, please use RepCountA_raw_Loader.py (slowly)
 from dataset.RepCountA_raw_Loader import MyData
 ## if your data is .npz form, please use RepCountA_Loader.py. It can speed up the training
 # from dataset.RepCountA_Loader import MyData
-
+# you can use 'tools.video2npz.py' to transform .mp4 tp .npz
 from models.TransRAC import TransferModel
 from training.train_looping import train_loop
 

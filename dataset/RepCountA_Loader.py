@@ -1,7 +1,9 @@
 ''' 
 Repcount data loader from fixed frames file(.npz) which will be uploaded soon.
 if you don't pre-process the data file,for example,your raw file is .mp4,
-you can use the *RepCountA_raw_Loader.py*.
+you can use the *RepCountA_raw_Loader.py*(slowly).
+or
+you can use 'tools.video2npz.py' to transform .mp4 tp .npz
 '''
 import csv
 import os
