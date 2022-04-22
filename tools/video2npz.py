@@ -76,9 +76,10 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         """
-        Args:
-            index:
+        Save the preprocess frames and original video length in NPZ.
+        npz[img = frames, fps = original_frames_length]
         """
+
         filename = self.file_list[index]
         video_path = os.path.join(self.video_dir, filename)
         npy_pth = npy_dir + os.path.splitext(filename)[0] + '.npz'
