@@ -33,7 +33,7 @@ Firstly, you should loading the pretrained model [Video Swin Transformer](https:
 
 Secondly, you should modify [train.py](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/training/train.py) to your config.
 
-*Tips*: The data form can be .mp4 or .npz. We recommend to use .npz data because it is faster. We will upload the preprocessed data(.npz) soon. You can also use [video2npz](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/tools/video2npz.py) to transform them by your self.
+*Tips*: The data form can be .mp4 or .npz. We recommend to use .npz data because it is faster. We will upload the preprocessed data(.npz) soon. You can also refer to [video2npz](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/tools/video2npz.py) to transform them by yourself.
 
 We will upload the TransRAC trained model soon which may help you to reproduce our paper.
 ### Train   
