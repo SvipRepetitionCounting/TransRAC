@@ -2,6 +2,8 @@
 
 ## Requirment 
 please refer to the [requirements.txt](requirements.txt) file.  
+recommand to use conda virtual env.  
+note that some requirements are not so strict.   
 ```
 pip install -r requirements.txt 
 ```
