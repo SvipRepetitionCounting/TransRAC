@@ -23,28 +23,28 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 	<tr>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/raising.gif" width="25%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/raising.gif" width="80%" />
 				<br/>
 				<font color="AAAAAA">raising</font>
 			</center>
 		</td>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/jump_jack.gif" width="25%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/jump_jack.gif" width="80%" />
 				<br/>
 				<font color="AAAAAA">jump jack</font>
 			</center>
 		</td>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif" width="25%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif" width="80%" />
 				<br/>
 				<font color="AAAAAA">squat</font>
 			</center>
 		</td>
     <td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/pull_up.gif" width="25%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/pull_up.gif" width="80%" />
 				<br/>
 				<font color="AAAAAA">pull up</font>
 			</center>
