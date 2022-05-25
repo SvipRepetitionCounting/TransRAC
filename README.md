@@ -23,7 +23,7 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 	<tr>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/raising.gif" width="80%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/raising.gif" width="100%" />
       </center>
       <center>
 				<font color="AAAAAA">raising</font>
@@ -31,7 +31,7 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 		</td>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/jump_jack.gif" width="80%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/jump_jack.gif" width="100%" />
       </center>
       <center>
 				<font color="AAAAAA">jump jack</font>
@@ -41,7 +41,7 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
   <tr>
 		<td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif" width="80%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif" width="100%" />
       </center>
       <center>
 				<font color="AAAAAA">squat</font>
@@ -49,7 +49,7 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 		</td>
     <td>
 			<center>
-				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/pull_up.gif" width="80%" />
+				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/pull_up.gif" width="100%" />
 			</center>
       <center>
 				<font color="AAAAAA">pull up</font>
