@@ -35,6 +35,8 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 				<font color="AAAAAA">jump jack</font>
 			</center>
 		</td>
+  </tr>
+  <tr>
 		<td>
 			<center>
 				<img src="https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif" width="80%" />
