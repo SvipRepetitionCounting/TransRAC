@@ -45,9 +45,7 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 		</td>
 	</tr>
 </table>
-<!-- 
-![前举](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/raising.gif)|![开合跳](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/jump_jack.gif)
-![下蹲](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/squat.gif)|![引体向上](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/pull_up.gif) -->
+
 
 ### Dataset introduction  
 We introduce a novel repetition action counting dataset called RepCount that contains videos with significant variations in length and allows for multiple kinds of anomaly cases. These video data collaborate with fine-grained annotations that indicate the beginning and end of each action period. Furthermore, the dataset consists of two subsets namely Part-A and Part-B. The videos in Part-A are fetched from YouTube, while the others in Part-B record simulated physical examinations by junior school students and teachers.   
