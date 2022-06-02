@@ -14,9 +14,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 ## Introduction
 Counting repetitive actions are widely seen in human activities such as physical exercise. Existing methods focus on performing repetitive action counting in short videos, which is tough for dealing with longer videos in more realistic scenarios. In the data-driven era, the degradation of such generalization capability is mainly attributed to the lack of long video datasets. To complement this margin, we introduce a new large-scale repetitive action counting dataset covering a wide variety of video lengths, along with more realistic situations where action interruption or action inconsistencies occur in the video. Besides, we also provide a fine-grained annotation of the action cycles instead of just counting annotation along with a numerical value. Such a dataset contains 1451 videos with about 20000 annotations, which is more challenging. For repetitive action counting towards more realistic scenarios, we further propose **encoding multi-scale temporal correlation with transformers** that can take into account both performance and efficiency. Furthermore, with the help of fine-grained annotation of action cycles, we propose a density map regression-based method to predict the action period, which yields better performance with sufficient interpretability. Our proposed method outperforms state-of-the-art methods on all datasets and also achieves better performance on the un-seen dataset without fine-tuning. 
 
-## Video Presentation  
 
-<iframe src="//player.bilibili.com/player.html?aid=342075413&bvid=BV1B94y1S7oP&cid=736154152&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>  
 
 
 ## RepCount Dataset   
@@ -52,6 +50,10 @@ The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_d
 
 ### Dataset introduction  
 We introduce a novel repetition action counting dataset called RepCount that contains videos with significant variations in length and allows for multiple kinds of anomaly cases. These video data collaborate with fine-grained annotations that indicate the beginning and end of each action period. Furthermore, the dataset consists of two subsets namely Part-A and Part-B. The videos in Part-A are fetched from YouTube, while the others in Part-B record simulated physical examinations by junior school students and teachers.   
+
+## Video Presentation  
+<center><a href="https://www.bilibili.com/video/BV1B94y1S7oP?share_source=copy_web" target="_blank" style="color: #990000"> Bilibili </a></center>       <br/> 
+<center><a href="https://youtu.be/SFpUS9mHHpk" target="_blank" style="color: #990000"> YouTube </a></center>  
 
 ------
 ## Usage  
