@@ -14,10 +14,10 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 ## Introduction
 Counting repetitive actions are widely seen in human activities such as physical exercise. Existing methods focus on performing repetitive action counting in short videos, which is tough for dealing with longer videos in more realistic scenarios. In the data-driven era, the degradation of such generalization capability is mainly attributed to the lack of long video datasets. To complement this margin, we introduce a new large-scale repetitive action counting dataset covering a wide variety of video lengths, along with more realistic situations where action interruption or action inconsistencies occur in the video. Besides, we also provide a fine-grained annotation of the action cycles instead of just counting annotation along with a numerical value. Such a dataset contains 1451 videos with about 20000 annotations, which is more challenging. For repetitive action counting towards more realistic scenarios, we further propose **encoding multi-scale temporal correlation with transformers** that can take into account both performance and efficiency. Furthermore, with the help of fine-grained annotation of action cycles, we propose a density map regression-based method to predict the action period, which yields better performance with sufficient interpretability. Our proposed method outperforms state-of-the-art methods on all datasets and also achieves better performance on the un-seen dataset without fine-tuning. 
 
-![architecture](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/figures/TransRAC_architecture.png)
+## Video Presentation  
 
-## Video Presentation
-<iframe height=498 width=510 src="[在线视频链接](https://www.bilibili.com/video/BV1B94y1S7oP?spm_id_from=333.1007.top_right_bar_window_custom_collection.content.click)">
+<iframe src="//player.bilibili.com/player.html?aid=342075413&bvid=BV1B94y1S7oP&cid=736154152&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>  
+
 
 ## RepCount Dataset   
 The Homepage of [RepCount Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) is available now. 
