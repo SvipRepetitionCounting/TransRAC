@@ -63,7 +63,7 @@ Please refer to [install.md](https://github.com/SvipRepetitionCounting/TransRAC/
 ### Data preparation
 Firstly, you should loading the pretrained model [Video Swin Transformer](https://github.com/SwinTransformer/Video-Swin-Transformer)([github](https://github.com/SwinTransformer/storage/releases/download/v1.0.4/swin_tiny_patch244_window877_kinetics400_1k.pth)) in to the folder '[pretrained](https://github.com/SvipRepetitionCounting/TransRAC/tree/main/pretrained)'.
 
-Secondly, you should modify [train.py](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/training/train.py) to your config.
+Secondly, you should modify [train.py](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/train.py) to your config.
 
 *Tips*: The data form can be .mp4 or .npz. We recommend to use .npz data because it is faster. We will upload the preprocessed data(.npz) soon. You can also refer to [video2npz](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/tools/video2npz.py) to transform them by yourself.
 
