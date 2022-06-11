@@ -80,8 +80,17 @@ But please understand that the response may be delayed as we are working on othe
 
 ------
 ## Citation 
-If you find the project or the dataset is useful, please consider citing the paper.
-
+If you find the project or the dataset is useful, please consider citing the paper.  
+```
+@inproceedings{hu2022transrac,
+  title={TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
+  author={Hu, Huazhang and Dong, Sixun and Zhao, Yiqun and Lian, Dongze and Li, Zhengxin and Gao, Shenghua},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={19013--19022},
+  year={2022}
+}
+```
+or  
 ```
 @article{hu2022transrac,
   title={TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
@@ -90,6 +99,4 @@ If you find the project or the dataset is useful, please consider citing the pap
   year={2022}
 }
 ```
-
-
 
