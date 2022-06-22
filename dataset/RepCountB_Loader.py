@@ -6,6 +6,8 @@ import cv2
 from torch.utils.data import Dataset, DataLoader
 import kornia
 import torch
+import torchvision.transforms as transforms
+
 
 class TestData(Dataset):
     def __init__(self, root_path, video_path, label_path, num_frame):
@@ -62,7 +64,7 @@ class VideoRead:
                 frame = frames[i * len(frames) // self.num_frames]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
-                # frame = transform(frame).unsqueeze(0)
+                frame = transforms.ToTensor()(frame)
                 frames_tensor.append(frame)
 
         else:   # if raw frames number lower than 64, padding it. 
@@ -70,16 +72,19 @@ class VideoRead:
                 frame = frames[i]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
+                frame = transforms.ToTensor()(frame)
                 frames_tensor.append(frame)
             for i in range(self.num_frames - self.frame_length):
                 frame = frames[self.frame_length - 1]
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (224, 224))  # [64, 3, 224, 224]
+                frame = transforms.ToTensor()(frame)
                 frames_tensor.append(frame)
-        frames_tensor = np.asarray_chkfinite(frames_tensor, dtype=np.uint8)
-        frames_tensor = kornia.image_to_tensor(frames_tensor, keepdim=False).div(255.0)
+        # frames_tensor = np.asarray_chkfinite(frames_tensor, dtype=np.uint8)
+        # frames_tensor = kornia.image_to_tensor(frames_tensor, keepdim=False).div(255.0)
+        Frame_Tensor=torch.as_tensor(np.stack(frames_tensor))   
 
-        return frames_tensor
+        return Frame_Tensor
 
 
 def get_labels_dict(path):
