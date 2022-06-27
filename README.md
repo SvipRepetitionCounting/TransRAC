@@ -7,7 +7,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 
 ## 🌱News
 - 2022-06-01: The oral presentation of our work is available. [[Youtube](https://youtu.be/SFpUS9mHHpk)] [[Bilibili](https://www.bilibili.com/video/BV1B94y1S7oP?share_source=copy_web)]
-- 2022-04-05: The [arXiv preprint](https://arxiv.org/abs/2204.01018) of the paper is available. 
+- 2022-04-05: The preprint of the paper is available. [[arXiv](https://arxiv.org/abs/2204.01018)]
 - 2022-03-22: The [Repetition Action Counting Dataset](https://svip-lab.github.io/dataset/RepCount_dataset.html) Homepage is open for the community. 
 - 2022-03-02: This paper has been accepted by **`CVPR 2022`** as  **`Oral presentation`**
 
