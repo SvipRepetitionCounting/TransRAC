@@ -69,9 +69,17 @@ Secondly, you should modify [train.py](https://github.com/SvipRepetitionCounting
 
 *Tips*: The data form can be .mp4 or .npz. We recommend to use .npz data because it is faster. We will upload the preprocessed data(.npz) soon. You can also refer to [video2npz](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/tools/video2npz.py) to transform them by yourself.
 
-We will upload the TransRAC trained model soon which may help you to reproduce our paper.
+
 ### Train   
 ` python train.py `    
+
+### Model Zoo
+##### RepCount Dataset 
+|  Method   | Backbone | Frame | Training Dataset | CheckPoint |  MAE  | OBO |
+|  :---: | :-----: | :----:  | :----:       |  :---------------------------:            | :---: | :---: |
+| Ours  | [Video Swin Transformer](https://github.com/SwinTransformer/Video-Swin-Transformer) | 64 | [RepCount-A](https://svip-lab.github.io/dataset/RepCount_dataset.html) | [OneDrive(extraction code: transrac)](https://shanghaitecheducn-my.sharepoint.com/:f:/g/personal/dongsx_shanghaitech_edu_cn/Eg2-I2dG_BhKkuBJGnTg200BhhsEAYmCx3xgAvRuTEURuA?e=YURfkP) / [BaiduDisk(extraction code: 2022)](https://pan.baidu.com/s/13pVq7JVsaM9MrJ-AsO5Lvw?pwd=2022) | 0.44 | 0.29 |
+
+We will upload more TransRAC trained model soon which may help you.
 
 ------
 
