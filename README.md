@@ -6,6 +6,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 
 
 ## 🌱News
+- 2022-07-18: The model ckpt has been available[[ckpt]https://shanghaitecheducn-my.sharepoint.com/:f:/g/personal/dongsx_shanghaitech_edu_cn/Eg2-I2dG_BhKkuBJGnTg200BhhsEAYmCx3xgAvRuTEURuA?e=YURfkP].
 - 2022-06-24: We are invited to oral presentation with virtual attendance. 
 - 2022-06-01: The oral presentation of our work is available. [[Youtube](https://youtu.be/SFpUS9mHHpk)] [[Bilibili](https://www.bilibili.com/video/BV1B94y1S7oP?share_source=copy_web)]
 - 2022-04-05: The preprint of the paper is available. [[arXiv](https://arxiv.org/abs/2204.01018)]
