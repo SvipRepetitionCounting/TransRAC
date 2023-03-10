@@ -128,7 +128,7 @@ class MyDataset(Dataset):
                     frames.append(frame_rgb)
             cap.release()
             original_frames_length = len(frames)
-            # frames = self.adjust_frames(frames)  # uncomment to adjust frames
+            frames = self.adjust_frames(frames)  # uncomment to adjust frames
             frames = np.asarray(frames)  # [f,w,h,c]
             if (frames.size != 0):
                 frames = frames.transpose(0, 3, 2, 1)  # [f,c,h,w]
