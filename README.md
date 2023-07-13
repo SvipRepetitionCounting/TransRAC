@@ -6,6 +6,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 
 
 ## 🌱News
+- 2023-07-13: We are planning to release the RepCount-B dataset within a week.
 - 2023-04-10: We have updated the Chinese introduction of the paper. [[Zhihu](https://zhuanlan.zhihu.com/p/543376943?)]
 - 2022-07-18: The model ckpt has been available.[[OneDrive(extraction code: transrac)](https://shanghaitecheducn-my.sharepoint.com/:f:/g/personal/dongsx_shanghaitech_edu_cn/Eg2-I2dG_BhKkuBJGnTg200BhhsEAYmCx3xgAvRuTEURuA?e=YURfkP)][[BaiduDisk(extraction code: 2022)](https://pan.baidu.com/s/13pVq7JVsaM9MrJ-AsO5Lvw?pwd=2022)]
 - 2022-06-24: We are invited to oral presentation with virtual attendance. 
