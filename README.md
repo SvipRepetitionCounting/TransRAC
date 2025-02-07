@@ -94,7 +94,7 @@ But please understand that the response may be delayed as we are working on othe
 
 ------
 ## Citation 
-If you find the project or the dataset is useful, please consider citing the paper.  
+If you find this project or dataset useful, please consider citing the paper.
 ```
 @inproceedings{hu2022transrac,
   title={TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
@@ -104,13 +104,5 @@ If you find the project or the dataset is useful, please consider citing the pap
   year={2022}
 }
 ```
-or  
-```
-@article{hu2022transrac,
-  title={TransRAC: Encoding Multi-scale Temporal Correlation with Transformers for Repetitive Action Counting},
-  author={Hu, Huazhang and Dong, Sixun and Zhao, Yiqun and Lian, Dongze and Li, Zhengxin and Gao, Shenghua},
-  journal={arXiv preprint arXiv:2204.01018},
-  year={2022}
-}
-```
+
 
