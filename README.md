@@ -8,7 +8,7 @@ Here is the official implementation for CVPR 2022 paper "TransRAC: Encoding Mult
 ## 🌱News
 - 2025-02-06: After contacting RepNet's authors, we clarified the different performances caused by experimental settings and the evaluation details between RepNet and TransRAC. Furthermore, we wrote a short note:[ Detailed Explanation of the Experimental Settings in TransRAC.pdf ](https://github.com/SvipRepetitionCounting/TransRAC/blob/main/TranRAC_Experimental_Settings.pdf) to help address the confusion.
 - 2024-11-14: We noticed the authors of RepNet posted a note titled "A Short Note on Evaluating RepNet for Temporal Repetition Counting in Videos."  We are writing a short paper with a detailed explanation of our experimental setting. In a word, we evaluate different frameworks by retraining them on RepCount-A.
-- 2023-07-13: We are planning to release the RepCount-B dataset within a week.
+- 2023-07-13: ~~We are planning to release the RepCount-B dataset within a week.~~ Please refer to [the issue](https://github.com/SvipRepetitionCounting/TransRAC/issues/44#issuecomment-1633688728) for detailed reasons and solutions.
 - 2023-04-10: We have updated the Chinese introduction of the paper. [[Zhihu](https://zhuanlan.zhihu.com/p/543376943?)]
 - 2022-07-18: The model ckpt has been available.[[OneDrive(extraction code: transrac)](https://shanghaitecheducn-my.sharepoint.com/:f:/g/personal/dongsx_shanghaitech_edu_cn/Eg2-I2dG_BhKkuBJGnTg200BhhsEAYmCx3xgAvRuTEURuA?e=YURfkP)][[BaiduDisk(extraction code: 2022)](https://pan.baidu.com/s/13pVq7JVsaM9MrJ-AsO5Lvw?pwd=2022)]
 - 2022-06-24: We are invited to oral presentation with virtual attendance. 
